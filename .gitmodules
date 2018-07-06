@@ -1,0 +1,6 @@
+[submodule "darknet"]
+	path = darknet
+	url = https://github.com/pjreddie/darknet.git
+[submodule "sort"]
+	path = sort
+	url = https://github.com/guillemfrancisco/sort
