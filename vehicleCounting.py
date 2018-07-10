@@ -1,15 +1,19 @@
 #-----------------------------
 #<-------- Libraries -------->
 #-----------------------------
-from ctypes import *
-from sort import *
 import math
 import random
 import cv2
 import time
 import numpy as np
 import os.path
+import sys
 
+from ctypes import *
+from sort import *
+
+sys.path.insert(0, "sort/")
+import sort
 
 
 #-----------------------------
@@ -236,7 +240,7 @@ if __name__ == "__main__":
     #cap.set(4, 720)
 
     #Instance of sort
-    mot_tracker = Sort()
+    mot_tracker = sort.Sort()
 
     #Saving video
     frame_width = int(cap.get(3))
