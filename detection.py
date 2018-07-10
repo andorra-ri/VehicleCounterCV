@@ -11,7 +11,7 @@ import numpy as np
 #-----------------------------
 #<------ Configuration ------>
 #-----------------------------
-with open('YOLOdict.pickle', 'rb') as handle:
+with open('config-files/YOLOdict.pickle', 'rb') as handle:
     YOLOdict = pickle.load(handle)
 
 #lib = CDLL("/home/nvidia/Desktop/darknet/darknetPython/libdarknet.so", RTLD_GLOBAL) #Absolute path

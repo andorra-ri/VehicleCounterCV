@@ -21,8 +21,14 @@ import sort
 #-----------------------------
 #<------ Configuration ------>
 #-----------------------------
-with open('YOLOdict.pickle', 'rb') as handle:
+with open('config-files/YOLOdict.pickle', 'rb') as handle:
     YOLOdict = pickle.load(handle)
+
+try:
+    with open('config-files/maskGeom.pickle') as handle:
+        mask = pickle.load(handle)
+except:
+    print("Oops! I couldn't find mask.pickle file... Make sure to run config.py to define it")
 
 
 #-----------------------------
@@ -77,7 +83,7 @@ if __name__ == "__main__":
     cv2.namedWindow("img", cv2.WINDOW_NORMAL)
 
     #Define roi as [xmin, ymin, xmax, ymax]
-    roibbox = np.array([350,240,750, 390])
+    roibbox = np.array([maskGeom.get("xmin"), mask.get("ymin"), mask.get("xmax"), mask.get("ymax")])
 
     ###MAIN LOOP
     while(1):
