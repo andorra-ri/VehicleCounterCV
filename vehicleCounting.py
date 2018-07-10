@@ -8,6 +8,7 @@ import time
 import numpy as np
 import os.path
 import sys
+import pickle
 
 from ctypes import *
 from sort import *
@@ -66,7 +67,8 @@ class METADATA(Structure):
     _fields_ = [("classes", c_int),
                 ("names", POINTER(c_char_p))]
 
-YOLOdict = {'car': 1, 'truck': 2, 'bus': 3, 'person':4, 'others':5}
+with open('YOLOdict.pickle', 'rb') as handle:
+    YOLOdict = pickle.load(handle)
 
 #lib = CDLL("/home/nvidia/Desktop/darknet/darknetPython/libdarknet.so", RTLD_GLOBAL) #Absolute path
 lib = CDLL("libdarknet.so", RTLD_GLOBAL)
