@@ -1,0 +1,78 @@
+#-----------------------------
+#<-------- Libraries -------->
+#-----------------------------
+import math
+import random
+import cv2
+import time
+import numpy as np
+
+#-----------------------------
+#<------ Configuration ------>
+#-----------------------------
+with open('config-files/YOLOdict.pickle', 'rb') as handle:
+    YOLOdict = pickle.load(handle)
+
+
+#-----------------------------
+#<--------- Classes --------->
+#-----------------------------
+class lane:
+    def __init__(self, id, vertices, type):
+        self.ID = id
+        self.VERTICES = vertices
+        self.TYPE = type                      #type must be 0(indiferent), 1(in), 2(out)
+
+    def getVertices(self):
+        return self.VERTICES
+
+
+
+class simpleCounter:
+    def __init__(self, id, name):
+        self.ID = id
+        self.NAME = name
+        self.lanes = []
+        self.counter = {}            #Counter with the following structure: {type:counts, type:counts, ...}
+
+        for key, value in YOLOdict.items():
+            counter[value] = 0
+
+    def appendLane(self, lane):
+        self.lanes.append(lane)
+
+    def intersection(self, centers):
+
+        line1 = line(centers[2], centers[3])
+
+        for lane in lanes:
+            line2 = line([lane[0], lane[1]], [lane[2], lane[3]])
+
+            D  = L1[0] * L2[1] - L1[1] * L2[0]
+            Dx = L1[2] * L2[1] - L1[1] * L2[2]
+            Dy = L1[0] * L2[2] - L1[2] * L2[0]
+            if D != 0:
+                count(centers[1])
+
+    def line(p1, p2):
+        A = (p1[1] - p2[1])
+        B = (p2[0] - p1[0])
+        C = (p1[0]*p2[1] - p2[0]*p1[1])
+        return A, B, -C
+
+    def count(self, type):
+        self.counter[type] +=1
+
+    def getCounts(self):
+        return self.counter
+
+    def draw(self, img):
+        #draw into the cv2.img
+
+    def clear(self):
+        self.counter = dict.fromkeys(self.counter, 0)
+
+
+
+class complexCounter():
+    #empty for the moment
