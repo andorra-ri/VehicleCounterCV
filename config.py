@@ -24,13 +24,13 @@ laneID = ''
 laneNAME = ''
 laneVERTICES = []
 
-if(os.path.isFile("config-files/maskGeom.pickle")):
+if(os.path.exists("config-files/maskGeom.pickle")):
     with open('config-files/maskGeom.pickle', 'rb') as handle:
         maskVertices = pickle.load(handle)
 elif:
     maskVertices = []
 
-if(os.path.isFile("config-files/counterGeom.pickle")):
+if(os.path.exists("config-files/counterGeom.pickle")):
     with open('config-files/counterGeom.pickle', 'rb') as handle:
         lanes = pickle.load(handle)
 elif:
@@ -69,8 +69,12 @@ if __name__ == "__main__":
     while(1):
         ret, img = cap.read()
 
-        #draw mask
-        #draw all lane in lanes by type (0, 1, 2)
+        if(len(maskVertices) == 2):
+            cv2.rectangle(img, maskVertices[0], maskVertices[1], [0,0,255], 2)
+        if(len(lanes) > 0):
+            for lane in lanes:
+                cv2.line(img, lane[4][0], lane[4][1], [0,255,0], 1)
+        
         cv2.putText(img, instructions, (20,30), cv2.FONT_HERSHEY_TRIPLEX, 0.5, (255,255,255))
 	    cv2.putText(img, extra, (20,55), cv2.FONT_HERSHEY_DUPLEX, 0.7, (255,255,255))
 
@@ -177,4 +181,10 @@ if __name__ == "__main__":
 
 
     	if key == 27:	# Press ESC to quit
+            #Save mask to maskGeom.pickle
+            with open('config-files/maskGeom.pickle', 'wb') as handle:
+                pickle.dump(maskVertices, handle, protocol = pickle.HIGHEST_PROTOCOL )
+            #Save lanes[] to counterGeom.pickle
+            with open('config-files/counterGeom.pickle', 'wb') as handle:
+                pickle.dump(lanes, handle, protocol = pickle.HIGHEST_PROTOCOL )
     		break
