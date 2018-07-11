@@ -18,10 +18,14 @@ with open('config-files/YOLOdict.pickle', 'rb') as handle:
 #<--------- Classes --------->
 #-----------------------------
 class lane:
-    def __init__(self, id, vertices, type):
+    def __init__(self, id, name, type):
         self.ID = id
-        self.VERTICES = vertices
+        self.NAME = name
+        self.VERTICES = []              #[[x1, y1], [x2, y2]]
         self.TYPE = type                      #type must be 0(indiferent), 1(in), 2(out)
+
+    def appendVertices(self, vertices):
+        self.VERTICES.append(vertices)
 
     def getVertices(self):
         return self.VERTICES
@@ -36,7 +40,7 @@ class simpleCounter:
         self.counter = {}            #Counter with the following structure: {type:counts, type:counts, ...}
 
         for key, value in YOLOdict.items():
-            counter[value] = 0
+            self.counter[value] = 0
 
     def appendLane(self, lane):
         self.lanes.append(lane)
@@ -46,7 +50,7 @@ class simpleCounter:
         line1 = line(centers[2], centers[3])
 
         for lane in lanes:
-            line2 = line([lane[0], lane[1]], [lane[2], lane[3]])
+            line2 = line(lane[0], lane[1])
 
             D  = L1[0] * L2[1] - L1[1] * L2[0]
             Dx = L1[2] * L2[1] - L1[1] * L2[2]
@@ -67,12 +71,12 @@ class simpleCounter:
         return self.counter
 
     def draw(self, img):
-        #draw into the cv2.img
+        '''draw into the cv2.img'''
 
     def clear(self):
         self.counter = dict.fromkeys(self.counter, 0)
 
 
 
-class complexCounter():
+class complexCounter:
     #empty for the moment
