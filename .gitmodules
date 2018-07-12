@@ -1,6 +1,6 @@
 [submodule "darknet"]
 	path = darknet
-	url = https://github.com/pjreddie/darknet/tree/yolov3
+	url = https://github.com/pjreddie/darknet
 [submodule "sort"]
 	path = sort
 	url = https://github.com/guillemfrancisco/sort.git
