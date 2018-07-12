@@ -70,8 +70,10 @@ class simpleCounter:
     def getCounts(self):
         return self.counter
 
-    def draw(self, img):
-        '''draw into the cv2.img'''
+    def drawLanes(self, img):
+        if(len(lanes) > 0):
+            for lane in lanes:
+                cv2.line(img, tuple(lane[3][0][0]), tuple(lane[3][0][1]), [0,255,0], 1)
 
     def clear(self):
         self.counter = dict.fromkeys(self.counter, 0)

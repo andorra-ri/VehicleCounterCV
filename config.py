@@ -71,10 +71,9 @@ if __name__ == "__main__":
         ret, img = cap.read()
 
         if(len(maskVertices) == 2):
-            cv2.rectangle(img, maskVertices[0], maskVertices[1], [0,0,255], 2)
-        if(len(lanes) > 0):
-            for lane in lanes:
-                cv2.line(img, tuple(lane[3][0][0]), tuple(lane[3][0][1]), [0,255,0], 1)
+            cv2.rectangle(img, tuple(maskVertices[0]), tuple(maskVertices[1]), [0,0,255], 2)
+
+        cntr.drawLanes(img)
 
         cv2.putText(img, instructions, (20,30), cv2.FONT_HERSHEY_TRIPLEX, 0.5, (255,255,255))
 	    cv2.putText(img, extra, (20,55), cv2.FONT_HERSHEY_DUPLEX, 0.7, (255,255,255))
@@ -191,6 +190,6 @@ if __name__ == "__main__":
             with open('config-files/counterGeom.pickle', 'wb') as handle:
                 pickle.dump(lanes, handle, protocol = pickle.HIGHEST_PROTOCOL )
 
-                
+
     	if key == 27:    # Press ESC to quit
     		break

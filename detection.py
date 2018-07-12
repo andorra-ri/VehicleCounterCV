@@ -200,3 +200,13 @@ def detect_numpy(net, meta, image, thresh=.3, hier_thresh=.5, nms=.45):
     free_detections(dets, num)
     r =np.array(res)
     return r
+
+def drawDetections(bboxs, img, color):
+    for bbox in bboxs:
+        xmin, ymin, xmax, ymax = int(bbox[0]), int(bbox[1]), int(bbox[2]), int(bbox[3])
+        pt1 = (xmin, ymin)
+        pt2 = (xmax, ymax)
+        if(len(bbox) == 6):
+            otype = list(YOLOdict.keys())[list(YOLOdict.values()).index(bbox[5])]
+            cv2.rectangle(img, pt1, pt2, color, 2)
+            cv2.putText(img, otype+str(bbox[4]), (pt1[0], pt1[1] + 30), cv2.FONT_HERSHEY_SIMPLEX, 1, color, 4)
