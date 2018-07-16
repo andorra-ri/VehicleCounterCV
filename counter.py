@@ -5,7 +5,10 @@ import math
 import random
 import cv2
 import time
-import numpy as np
+import pickle
+
+from matplotlib.path import Path
+from numpy import dot, array, empty_like
 
 #-----------------------------
 #<------ Configuration ------>
@@ -45,24 +48,39 @@ class simpleCounter:
     def appendLane(self, lane):
         self.lanes.append(lane)
 
+    @staticmethod
+    def make_path(x1, y1, x2, y2):
+        return Path([[x1,y1], [x1,y2], [x2,y2], [x2,y1]])
+
+    @staticmethod
+    def perp(a):
+        b = empty_like(a)
+        b[0] = -a[1]
+        b[1] = a[0]
+        return b
+
     def intersection(self, centers):
 
-        line1 = line(centers[2], centers[3])
+        a1 = array(centers[2])
+        a2 = array(centers[3])
 
-        for lane in lanes:
-            line2 = line(lane[0], lane[1])
+        for lane in self.lanes:
+            b1 = array(lane[3][0][0])
+            b2 = array(lane[3][0][1])
 
-            D  = L1[0] * L2[1] - L1[1] * L2[0]
-            Dx = L1[2] * L2[1] - L1[1] * L2[2]
-            Dy = L1[0] * L2[2] - L1[2] * L2[0]
-            if D != 0:
-                count(centers[1])
+            da = a2-a1
+            db = b2-b1
+            dp = a1-b1
+            dap = self.perp(da)
+            denom = dot( dap, db)
+            num = dot( dap, dp )
 
-    def line(p1, p2):
-        A = (p1[1] - p2[1])
-        B = (p2[0] - p1[0])
-        C = (p1[0]*p2[1] - p2[0]*p1[1])
-        return A, B, -C
+            x3 = ((num / denom.astype(float))*db + b1)[0]
+            y3 = ((num / denom.astype(float))*db + b1)[1]
+            p1 = self.make_path(a1[0],a1[1],a2[0],a2[1])
+            p2 = self.make_path(b1[0],b1[1],b2[0],b2[1])
+            if p1.contains_point([x3,y3]) and p2.contains_point([x3,y3]):
+                self.count(centers[1])
 
     def count(self, type):
         self.counter[type] +=1
