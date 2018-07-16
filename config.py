@@ -51,7 +51,11 @@ def mouseClicked(event, x, y, flags, param):
                 print("Mask has two vertices, you can't add another vertice!")
         if step == 9:
             if(len(laneVERTICES) <= 2):
-                laneVERTICES.append([x,y])
+                xmask = maskVertices[0][0]
+                ymask = maskVertices[0][1]
+                xlane = x - xmask
+                ylane = y - ymask
+                laneVERTICES.append([xlane,ylane])
             elif(len(laneVERTICES) ==2):
                 print("Lane has two vertices, you can't add another vertice!")
 
@@ -61,9 +65,9 @@ def mouseClicked(event, x, y, flags, param):
 #-----------------------------
 if __name__ == "__main__":
     #Load video here
-    cap = cv2.VideoCapture('testSalouS.mov')
+    cap = cv2.VideoCapture('videos/testSalou.mp4')
     ret, img = cap.read()
-    cv2.namedWindow("img", cv2.WINDOW_NORMAL)
+    cv2.namedWindow("img", cv2.WINDOW_GUI_NORMAL)
     cv2.setMouseCallback('img', mouseClicked)
 
     ###MAIN LOOP
@@ -73,7 +77,9 @@ if __name__ == "__main__":
         if(len(maskVertices) == 2):
             cv2.rectangle(img, tuple(maskVertices[0]), tuple(maskVertices[1]), [0,0,255], 2)
 
-        cntr.drawLanes(img)
+        if(len(lanes) > 0):
+            for lane in lanes:
+                cv2.line(img, tuple(lane[3][0][0]), tuple(lane[3][0][1]), [0,255,0], 1)
 
         cv2.putText(img, instructions, (20,30), cv2.FONT_HERSHEY_TRIPLEX, 0.5, (255,255,255))
 	    cv2.putText(img, extra, (20,55), cv2.FONT_HERSHEY_DUPLEX, 0.7, (255,255,255))
@@ -86,6 +92,7 @@ if __name__ == "__main__":
     		extra = ''
     		if key == 109:	# Press [m] to go step 1 (new mask)
     			step = 1
+                maskVertices = []
     			instructions = '[CLICK] Add vertices  -  [ENTER] Save & Finish'
             if key == 99:	# Press [c] to go step 2 (new counter)
     			step = 2
@@ -125,6 +132,7 @@ if __name__ == "__main__":
                 counterID = ''
                 counterNAME = ''
                 counterTYPE = ''
+                lanes = []
     		elif key == 115:
     			cntr = counter.simpleCounter(int(counterID), str(counterNAME))
             elif key == 99:
