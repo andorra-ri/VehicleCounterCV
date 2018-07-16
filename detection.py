@@ -6,6 +6,9 @@ import random
 import cv2
 import time
 import numpy as np
+import pickle
+
+from ctypes import *
 
 
 #-----------------------------
@@ -14,7 +17,60 @@ import numpy as np
 with open('config-files/YOLOdict.pickle', 'rb') as handle:
     YOLOdict = pickle.load(handle)
 
-#lib = CDLL("/home/nvidia/Desktop/darknet/darknetPython/libdarknet.so", RTLD_GLOBAL) #Absolute path
+
+#-----------------------------
+#<-------- YOLO shit -------->
+#-----------------------------
+def sample(probs):
+    s = sum(probs)
+    probs = [a/s for a in probs]
+    r = random.uniform(0, 1)
+    for i in range(len(probs)):
+        r = r - probs[i]
+        if r <= 0:
+            return i
+    return len(probs)-1
+
+def c_array(ctype, values):
+    new_values = values.ctypes.data_as(POINTER(ctype))
+    return new_values
+
+
+def array_to_image(arr):
+    # need to return old values to avoid python freeing memory
+    arr = arr.transpose(2,0,1)
+    c, h, w = arr.shape[0:3]
+    arr = np.ascontiguousarray(arr.flat, dtype=np.float32) / 255.0
+    data = arr.ctypes.data_as(POINTER(c_float))
+    im = IMAGE(w,h,c,data)
+    return im, arr
+
+
+class BOX(Structure):
+    _fields_ = [("x", c_float),
+                ("y", c_float),
+                ("w", c_float),
+                ("h", c_float)]
+
+class DETECTION(Structure):
+    _fields_ = [("bbox", BOX),
+                ("classes", c_int),
+                ("prob", POINTER(c_float)),
+                ("mask", POINTER(c_float)),
+                ("objectness", c_float),
+                ("sort_class", c_int)]
+
+
+class IMAGE(Structure):
+    _fields_ = [("w", c_int),
+                ("h", c_int),
+                ("c", c_int),
+                ("data", POINTER(c_float))]
+
+class METADATA(Structure):
+    _fields_ = [("classes", c_int),
+                ("names", POINTER(c_char_p))]
+
 lib = CDLL("darknet/libdarknet.so", RTLD_GLOBAL)
 lib.network_width.argtypes = [c_void_p]
 lib.network_width.restype = c_int
@@ -85,56 +141,6 @@ predict_image.argtypes = [c_void_p, IMAGE]
 predict_image.restype = POINTER(c_float)
 
 
-#-----------------------------
-#<-------- Functions -------->
-#-----------------------------
-def sample(probs):
-    s = sum(probs)
-    probs = [a/s for a in probs]
-    r = random.uniform(0, 1)
-    for i in range(len(probs)):
-        r = r - probs[i]
-        if r <= 0:
-            return i
-    return len(probs)-1
-
-def c_array(ctype, values):
-    new_values = values.ctypes.data_as(POINTER(ctype))
-    return new_values
-
-def array_to_image(arr):
-    # need to return old values to avoid python freeing memory
-    arr = arr.transpose(2,0,1)
-    c, h, w = arr.shape[0:3]
-    arr = np.ascontiguousarray(arr.flat, dtype=np.float32) / 255.0
-    data = arr.ctypes.data_as(POINTER(c_float))
-    im = IMAGE(w,h,c,data)
-    return im, arr
-
-class BOX(Structure):
-    _fields_ = [("x", c_float),
-                ("y", c_float),
-                ("w", c_float),
-                ("h", c_float)]
-
-class DETECTION(Structure):
-    _fields_ = [("bbox", BOX),
-                ("classes", c_int),
-                ("prob", POINTER(c_float)),
-                ("mask", POINTER(c_float)),
-                ("objectness", c_float),
-                ("sort_class", c_int)]
-
-class IMAGE(Structure):
-    _fields_ = [("w", c_int),
-                ("h", c_int),
-                ("c", c_int),
-                ("data", POINTER(c_float))]
-
-class METADATA(Structure):
-    _fields_ = [("classes", c_int),
-                ("names", POINTER(c_char_p))]
-
 def classify(net, meta, im):
     out = predict_image(net, im)
     res = []
@@ -142,6 +148,7 @@ def classify(net, meta, im):
         res.append((meta.names[i], out[i]))
     res = sorted(res, key=lambda x: -x[1])
     return res
+
 
 def detect(net, meta, image, thresh=.5, hier_thresh=.5, nms=.45):
     """if isinstance(image, bytes):
@@ -196,7 +203,6 @@ def detect_numpy(net, meta, image, thresh=.3, hier_thresh=.5, nms=.45):
                 intType = YOLOdict.get(meta.names[i].decode('utf-8'))
                 if(intType == None): intType = 5
                 res.append(((b.x - b.w/2), (b.y - b.h/2), (b.x + b.w/2), (b.y + b.h/2), dets[j].prob[i], intType))
-                #res.append((int(b.x - b.w/2), int(b.y - b.h/2), int(b.x + b.w/2), int(b.y + b.h/2), str(meta.names[i])))
     free_detections(dets, num)
     r =np.array(res)
     return r
@@ -208,5 +214,5 @@ def drawDetections(bboxs, img, color):
         pt2 = (xmax, ymax)
         if(len(bbox) == 6):
             otype = list(YOLOdict.keys())[list(YOLOdict.values()).index(bbox[5])]
-            cv2.rectangle(img, pt1, pt2, color, 2)
-            cv2.putText(img, otype+str(bbox[4]), (pt1[0], pt1[1] + 30), cv2.FONT_HERSHEY_SIMPLEX, 1, color, 4)
+            cv2.rectangle(img, pt1, pt2, color, 1)
+            cv2.putText(img, otype+str(bbox[4]), (pt1[0], pt1[1] + 30), cv2.FONT_HERSHEY_SIMPLEX, 1, color, 6)
