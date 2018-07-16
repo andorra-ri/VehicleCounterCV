@@ -9,9 +9,9 @@ import numpy as np
 import os.path
 import sys
 import pickle
+import counter
 
 from ctypes import *
-from sort import *
 from detection import *
 
 sys.path.insert(0, "sort/")
@@ -30,27 +30,15 @@ try:
 except:
     print("Oops! I couldn't find mask.pickle file... Make sure to run config.py to define it")
 
+try:
+    with open('config-files/counterGeom.pickle', 'rb') as handle:
+        lanes = pickle.load(handle)
+except:
+    print("Oops! I couldn't find counter.pickle file... Make sure to run config.py to define it")
 
 #-----------------------------
 #<-------- Functions -------->
 #-----------------------------
-def convertBack(x, y, w, h):
-	xmin = int(round(x - (w/2)))
-	xmax = int(round(x + (w/2)))
-	ymin = int(round(y - (h/2)))
-	ymax = int(round(y + (h/2)))
-	return xmin, ymin, xmax, ymax
-
-def draw(bboxs, img, color):
-    for i in bboxs:
-            xmin, ymin, xmax, ymax = int(i[0]), int(i[1]), int(i[2]), int(i[3])
-            pt1 = (xmin, ymin)
-            pt2 = (xmax, ymax)
-            if len(i) == 6:
-                otype = list(YOLOdict.keys())[list(YOLOdict.values()).index(i[5])]
-                cv2.rectangle(img, pt1, pt2, color, 2)
-                cv2.putText(img, otype+str(i[4]), (pt1[0], pt1[1] + 20), cv2.FONT_HERSHEY_SIMPLEX, 1, color, 4)
-
 def drawRoi(bbox, img, color):
     pt1 = (bbox[0], bbox[1])
     pt2 = (bbox[2], bbox[3])
@@ -63,13 +51,18 @@ def drawRoi(bbox, img, color):
 #-----------------------------
 if __name__ == "__main__":
     #Load video here
-    cap = cv2.VideoCapture('testSalouS.mov')
+    cap = cv2.VideoCapture('videos/testSalou.mp4')
     #Should we resize the video frame?
     #cap.set(3, 1280)
     #cap.set(4, 720)
 
     #Instance of sort
     mot_tracker = sort.Sort()
+
+    #Instance of simpleCounter
+    smplCounter = counter.simpleCounter()
+    for lane in lanes:
+        smplCounter.appendLane(lane)
 
     #Saving video
     frame_width = int(cap.get(3))
@@ -78,22 +71,32 @@ if __name__ == "__main__":
     out = cv2.VideoWriter('output.avi', fourcc, 25, (frame_width, frame_height))
 
     ret, img = cap.read()
-    net = load_net(b"cfg/yolov3.cfg", b"yolov3.weights", 0)
-    meta = load_meta(b"cfg/coco.data")
-    cv2.namedWindow("img", cv2.WINDOW_NORMAL)
+    net = load_net(b"darknet/cfg/yolov3.cfg", b"darknet/yolov3.weights", 0)
+    meta = load_meta(b"darknet/cfg/coco.data")
+    cv2.namedWindow("img", cv2.WINDOW_GUI_NORMAL)
 
-    #Define roi as [xmin, ymin, xmax, ymax]
-    roibbox = np.array([maskGeom.get("xmin"), mask.get("ymin"), mask.get("xmax"), mask.get("ymax")])
+    roibbox = np.array([mask[0][0], mask[0][1], mask[1][0], mask[1][1]])
 
     ###MAIN LOOP
     while(1):
         ret, img = cap.read()
-        roi =img[roibbox[1]:roibbox[3], roibbox[0]:roibbox[2]]
+        roi = img[roibbox[1]:roibbox[3], roibbox[0]:roibbox[2]]
+
         r = detect_numpy(net, meta, roi)                          #YOLO detection
         track_bbs_ids = mot_tracker.update(r)                     #SORT tracking
-        draw(track_bbs_ids, roi, [0,255,0])
+        centers = mot_tracker.get_centers()
+
+        for center in centers:
+            smplCounter.intersection(center)
+
+        for lane in lanes:
+            cv2.line(roi, tuple(lane[3][0][0]), tuple(lane[3][0][1]), [0,255,0], 2)
+
+        mot_tracker.draw(track_bbs_ids, roi, [0,255,0])
         img[roibbox[1]:roibbox[3], roibbox[0]:roibbox[2]] = roi
+
         drawRoi(roibbox, img, [0,0,255])
+        
         cv2.imshow("img", img)
         out.write(img)
 
