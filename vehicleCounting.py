@@ -63,6 +63,7 @@ if __name__ == "__main__":
     smplCounter = counter.simpleCounter()
     for lane in lanes:
         smplCounter.appendLane(lane)
+    smplCounter.initCounter()
 
     #Saving video
     frame_width = int(cap.get(3))
@@ -89,6 +90,8 @@ if __name__ == "__main__":
         for center in centers:
             smplCounter.intersection(center)
 
+        print(smplCounter.getCounts())
+
         for lane in lanes:
             cv2.line(roi, tuple(lane[3][0][0]), tuple(lane[3][0][1]), [0,255,0], 2)
 
@@ -96,7 +99,7 @@ if __name__ == "__main__":
         img[roibbox[1]:roibbox[3], roibbox[0]:roibbox[2]] = roi
 
         drawRoi(roibbox, img, [0,0,255])
-        
+
         cv2.imshow("img", img)
         out.write(img)
 

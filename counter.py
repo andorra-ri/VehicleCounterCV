@@ -40,13 +40,17 @@ class simpleCounter:
         self.ID = id
         self.NAME = name
         self.lanes = []
-        self.counter = {}            #Counter with the following structure: {type:counts, type:counts, ...}
+        self.counter = []
+        self.dictCounter = {}            #Counter with the following structure: {type:counts, type:counts, ...}
 
         for key, value in YOLOdict.items():
             self.counter[value] = 0
 
     def appendLane(self, lane):
         self.lanes.append(lane)
+
+    def initCounter(self):
+        self.counter = [self.dictCounter.copy() for k in range(len(self.lanes))]
 
     @staticmethod
     def make_path(x1, y1, x2, y2):
@@ -60,11 +64,10 @@ class simpleCounter:
         return b
 
     def intersection(self, centers):
-
         a1 = array(centers[2])
         a2 = array(centers[3])
 
-        for lane in self.lanes:
+        for l, lane in enumerate(self.lanes):
             b1 = array(lane[3][0][0])
             b2 = array(lane[3][0][1])
 
@@ -80,10 +83,10 @@ class simpleCounter:
             p1 = self.make_path(a1[0],a1[1],a2[0],a2[1])
             p2 = self.make_path(b1[0],b1[1],b2[0],b2[1])
             if p1.contains_point([x3,y3]) and p2.contains_point([x3,y3]):
-                self.count(centers[1])
+                self.count(l, centers[1])
 
-    def count(self, type):
-        self.counter[type] +=1
+    def count(self, l, type):
+        self.counter[l][type] +=1
 
     def getCounts(self):
         return self.counter
