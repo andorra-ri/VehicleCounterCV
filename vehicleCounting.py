@@ -45,6 +45,17 @@ def drawRoi(bbox, img, color):
 
     cv2.rectangle(img, pt1, pt2, color, 3)
 
+def drawCounter(counter, img, color, t):
+    yAddjust = t * 350
+
+    cv2.rectangle(img, (img.shape[1]-250, 50+yAddjust), (img.shape[1]-50, 50+300+yAddjust), color, -1)
+    cv2.putText(img, "Counter", (img.shape[1]-230, 100+yAddjust), cv2.FONT_HERSHEY_SIMPLEX, 1, [255, 255, 255], 6)
+
+    for num, key in enumerate(counter):
+        keyStr = str(list(YOLOdict.keys())[list(YOLOdict.values()).index(key)])
+        value = str(counter.get(key))
+        cv2.putText(img, keyStr+": "+value, (img.shape[1]-230, 160+40*num+yAddjust), cv2.FONT_HERSHEY_SIMPLEX, 1, [255,255,255], 4)
+
 
 #-----------------------------
 #<---------- Main ----------->
@@ -90,8 +101,6 @@ if __name__ == "__main__":
         for center in centers:
             smplCounter.intersection(center)
 
-        print(smplCounter.getCounts())
-
         for lane in lanes:
             cv2.line(roi, tuple(lane[3][0][0]), tuple(lane[3][0][1]), [0,255,0], 2)
 
@@ -99,6 +108,10 @@ if __name__ == "__main__":
         img[roibbox[1]:roibbox[3], roibbox[0]:roibbox[2]] = roi
 
         drawRoi(roibbox, img, [0,0,255])
+
+        counts = smplCounter.getCounts()
+        for t, count in enumerate(counts):
+            drawCounter(count, img, [169,169,169], t)
 
         cv2.imshow("img", img)
         out.write(img)
