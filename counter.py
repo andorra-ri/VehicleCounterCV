@@ -63,27 +63,28 @@ class simpleCounter:
         b[1] = a[0]
         return b
 
-    def intersection(self, centers):
-        a1 = array(centers[2])
-        a2 = array(centers[3])
+    def intersections(self, centers):
+        for center in centers:
+            a1 = array(center[2])
+            a2 = array(center[3])
 
-        for l, lane in enumerate(self.lanes):
-            b1 = array(lane[3][0][0])
-            b2 = array(lane[3][0][1])
+            for l, lane in enumerate(self.lanes):
+                b1 = array(lane[3][0][0])
+                b2 = array(lane[3][0][1])
 
-            da = a2-a1
-            db = b2-b1
-            dp = a1-b1
-            dap = self.perp(da)
-            denom = dot( dap, db)
-            num = dot( dap, dp )
+                da = a2-a1
+                db = b2-b1
+                dp = a1-b1
+                dap = self.perp(da)
+                denom = dot( dap, db)
+                num = dot( dap, dp )
 
-            x3 = ((num / denom.astype(float))*db + b1)[0]
-            y3 = ((num / denom.astype(float))*db + b1)[1]
-            p1 = self.make_path(a1[0],a1[1],a2[0],a2[1])
-            p2 = self.make_path(b1[0],b1[1],b2[0],b2[1])
-            if p1.contains_point([x3,y3]) and p2.contains_point([x3,y3]):
-                self.count(l, centers[1])
+                x3 = ((num / denom.astype(float))*db + b1)[0]
+                y3 = ((num / denom.astype(float))*db + b1)[1]
+                p1 = self.make_path(a1[0],a1[1],a2[0],a2[1])
+                p2 = self.make_path(b1[0],b1[1],b2[0],b2[1])
+                if p1.contains_point([x3,y3]) and p2.contains_point([x3,y3]):
+                    self.count(l, center[1])
 
     def count(self, l, type):
         self.counter[l][type] +=1

@@ -96,10 +96,8 @@ if __name__ == "__main__":
 
         r = detect_numpy(net, meta, roi)                          #YOLO detection
         track_bbs_ids = mot_tracker.update(r)                     #SORT tracking
-        centers = mot_tracker.get_centers()
-
-        for center in centers:
-            smplCounter.intersection(center)
+        centers = mot_tracker.get_centers()                       #SORT object centers
+        smplCounter.intersections(centers)                        #Counter intersection
 
         for lane in lanes:
             cv2.line(roi, tuple(lane[3][0][0]), tuple(lane[3][0][1]), [0,255,0], 2)
