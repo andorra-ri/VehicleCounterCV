@@ -31,12 +31,7 @@ if(os.path.exists("config-files/maskGeom.pickle")):
 else:
     maskVertices = []
 
-if(os.path.exists("config-files/counterGeom.pickle")):
-    with open('config-files/counterGeom.pickle', 'rb') as handle:
-        lanes = pickle.load(handle)
-else:
-    lanes = []
-
+counter = loadCounter("config-files/counterConfig.pickle")
 
 #-----------------------------
 #<-------- Functions -------->
@@ -77,9 +72,7 @@ if __name__ == "__main__":
         if(len(maskVertices) == 2):
             cv2.rectangle(img, tuple(maskVertices[0]), tuple(maskVertices[1]), [0,0,255], 2)
 
-        if(len(lanes) > 0):
-            for lane in lanes:
-                cv2.line(img, tuple(lane[3][0][0]), tuple(lane[3][0][1]), [0,255,0], 1)
+        counter.drawLanes(img)
 
         cv2.putText(img, instructions, (20,30), cv2.FONT_HERSHEY_TRIPLEX, 0.5, (255,255,255))
 	    cv2.putText(img, extra, (20,55), cv2.FONT_HERSHEY_DUPLEX, 0.7, (255,255,255))
@@ -96,6 +89,7 @@ if __name__ == "__main__":
     			instructions = '[CLICK] Add vertices  -  [ENTER] Save & Finish'
             if key == 99:	# Press [c] to go step 2 (new counter)
     			step = 2
+                counter = []
     			instructions = '[0-9] Enter ID  -  [ENTER] Save & Finish'
 
         # Add vertices to the mask
@@ -113,30 +107,33 @@ if __name__ == "__main__":
     			instructions = '[a-z]: Enter NAME -  [ENTER] Save & Finish'
     		elif key is not 255:		# Enter numeric ID
     			counterID += chr(key%256)
+                counter.append(counterID)
     			extra = counterID
 
         # Counter NAME
         elif step == 3:
     		if key == 13:    # Press ENTER to go step 4 (new counter type)
     			step = 4
-    			instructions = 'Enter Type: [s] SIMPLE  [o] COMPLEX -  [ENTER] Save & Finish'
+    			instructions = 'Enter Type: [0] SIMPLE  [1] COMPLEX -  [ENTER] Save & Finish'
     		elif key is not 255:		# Enter numeric ID
     			counterNAME += chr(key%256)
+                counter.append(counterNAME)
     			extra = counterNAME
 
         # Counter TYPE
         elif step == 4:
     		if key == 13:    # Press ENTER to go step 5 (new counter type)
     			step = 5
+                counter.append(counterTYPE)
     			instructions = '[+] Add new lane'
                 counterID = ''
                 counterNAME = ''
                 counterTYPE = ''
                 lanes = []
     		elif key == 115:
-    			cntr = counter.simpleCounter(int(counterID), str(counterNAME))
+    			counterTYPE = 0
             elif key == 99:
-    			cntr = counter.complexCounter(int(counterID), str(counterNAME))
+    			counterTYPE = 1
 
     	# New lane
         elif step == 5:
@@ -178,8 +175,6 @@ if __name__ == "__main__":
         elif step == 9:
     		if key == 13:
     			if len(laneVERTICES) == 2:
-                    lane = counter.lane(int(laneID), str(laneNAME), int(laneTYPE))
-                    lane.appendVertices(laneVERTICES)
                     lanes.append([lane.ID, lane.NAME, lane.TYPE, lane.VERTICES])
     				step = 5
     				instructions = '[+] Add new lane'
@@ -195,8 +190,9 @@ if __name__ == "__main__":
             with open('config-files/maskGeom.pickle', 'wb') as handle:
                 pickle.dump(maskVertices, handle, protocol = pickle.HIGHEST_PROTOCOL )
             #Save lanes[] to counterGeom.pickle
-            with open('config-files/counterGeom.pickle', 'wb') as handle:
-                pickle.dump(lanes, handle, protocol = pickle.HIGHEST_PROTOCOL )
+            with open('config-files/counterConfig.pickle', 'wb') as handle:
+                counter.append(lanes)
+                pickle.dump(counter, handle, protocol = pickle.HIGHEST_PROTOCOL )
 
 
     	if key == 27:    # Press ESC to quit

@@ -6,6 +6,7 @@ import random
 import cv2
 import time
 import pickle
+import os.path
 
 from matplotlib.path import Path
 from numpy import dot, array, empty_like
@@ -20,22 +21,19 @@ with open('config-files/YOLOdict.pickle', 'rb') as handle:
 #-----------------------------
 #<--------- Classes --------->
 #-----------------------------
-class lane:
-    def __init__(self, id, name, type):
+class Lane:
+    def __init__(self, id, name, type, vertices):
         self.ID = id
         self.NAME = name
-        self.VERTICES = []              #[[x1, y1], [x2, y2]]
+        self.VERTICES = vertices              #[[x1, y1], [x2, y2]]
         self.TYPE = type                      #type must be 0(indiferent), 1(in), 2(out)
-
-    def appendVertices(self, vertices):
-        self.VERTICES.append(vertices)
 
     def getVertices(self):
         return self.VERTICES
 
 
 
-class simpleCounter:
+class SimpleCounter:
     def __init__(self, id, name):
         self.ID = id
         self.NAME = name
@@ -97,10 +95,39 @@ class simpleCounter:
             for lane in lanes:
                 cv2.line(img, tuple(lane[3][0][0]), tuple(lane[3][0][1]), [0,255,0], 1)
 
+    def drawCounter(self, img):
+        for t, count in enumerate(self.counter):
+            yAddjust = t * 350
+
+            cv2.rectangle(img, (img.shape[1]-250, 50+yAddjust), (img.shape[1]-50, 50+300+yAddjust), color, -1)
+            cv2.putText(img, "Counter", (img.shape[1]-230, 100+yAddjust), cv2.FONT_HERSHEY_SIMPLEX, 1, [255, 255, 255], 6)
+
+            for num, key in enumerate(count):
+                keyStr = str(list(YOLOdict.keys())[list(YOLOdict.values()).index(key)])
+                value = str(counter.get(key))
+                cv2.putText(img, keyStr+": "+value, (img.shape[1]-230, 160+40*num+yAddjust), cv2.FONT_HERSHEY_SIMPLEX, 1, [255,255,255], 4)
+
     def clear(self):
         self.counter = dict.fromkeys(self.counter, 0)
 
 
 
-class complexCounter:
+class ComplexCounter:
     #empty for the moment
+
+
+
+def loadCounter(path):
+    if(os.path.exists("config-files/counterConfig.pickle")):
+        with open('config-files/counterConfig.pickle', 'rb') as handle:
+            counterConfig = pickle.load(handle)
+            if(counterConfig[2] == 0):
+                counter = simpleCounter(counterConfig[0], counterConfig[1])
+            else:
+                counter = complexCounter(counterConfig[0], counterConfig[1])
+
+            for lane in counter[3]:
+                counter.appendLane( Lane(lane[0], lane[1], lane[2], lane[3]) )
+
+    else:
+        counter = []

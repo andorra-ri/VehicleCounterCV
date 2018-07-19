@@ -30,11 +30,7 @@ try:
 except:
     print("Oops! I couldn't find mask.pickle file... Make sure to run config.py to define it")
 
-try:
-    with open('config-files/counterGeom.pickle', 'rb') as handle:
-        lanes = pickle.load(handle)
-except:
-    print("Oops! I couldn't find counter.pickle file... Make sure to run config.py to define it")
+counter = counter.loadCounter("config-files/counterConfig.pickle")
 
 #-----------------------------
 #<-------- Functions -------->
@@ -71,10 +67,7 @@ if __name__ == "__main__":
     mot_tracker = sort.Sort()
 
     #Instance of simpleCounter
-    smplCounter = counter.simpleCounter()
-    for lane in lanes:
-        smplCounter.appendLane(lane)
-    smplCounter.initCounter()
+    counter.initCounter()
 
     #Saving video
     frame_width = int(cap.get(3))
@@ -97,19 +90,16 @@ if __name__ == "__main__":
         r = detect_numpy(net, meta, roi)                          #YOLO detection
         track_bbs_ids = mot_tracker.update(r)                     #SORT tracking
         centers = mot_tracker.get_centers()                       #SORT object centers
-        smplCounter.intersections(centers)                        #Counter intersection
+        counter.intersections(centers)                            #Counter intersection
 
-        for lane in lanes:
-            cv2.line(roi, tuple(lane[3][0][0]), tuple(lane[3][0][1]), [0,255,0], 2)
+        counter.drawLanes(roi)
 
         mot_tracker.draw(track_bbs_ids, roi, [0,255,0])
         img[roibbox[1]:roibbox[3], roibbox[0]:roibbox[2]] = roi
 
         drawRoi(roibbox, img, [0,0,255])
 
-        counts = smplCounter.getCounts()
-        for t, count in enumerate(counts):
-            drawCounter(count, img, [169,169,169], t)
+        counter.drawCounter(img)
 
         cv2.imshow("img", img)
         out.write(img)
