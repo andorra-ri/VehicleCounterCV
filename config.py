@@ -9,6 +9,7 @@ import numpy as np
 import pickle
 import os.path
 import counter
+import utils
 
 
 #-----------------------------
@@ -17,6 +18,7 @@ import counter
 instructions = '[m] Add mask or [c] Add counter'
 extra = ''
 step = 0
+maskVertices = []
 counterTYPE = ''
 counterID = ''
 counterNAME = ''
@@ -25,12 +27,8 @@ laneNAME = ''
 laneTYPE = ''
 laneVERTICES = []
 
-if(os.path.exists("config-files/maskGeom.pickle")):
-    with open('config-files/maskGeom.pickle', 'rb') as handle:
-        maskVertices = pickle.load(handle)
-else:
-    maskVertices = []
-
+mask = utils.Mask()
+mask.loadMask("config-files/maskConfig.pickle")
 counter = loadCounter("config-files/counterConfig.pickle")
 
 #-----------------------------
@@ -69,9 +67,7 @@ if __name__ == "__main__":
     while(1):
         ret, img = cap.read()
 
-        if(len(maskVertices) == 2):
-            cv2.rectangle(img, tuple(maskVertices[0]), tuple(maskVertices[1]), [0,0,255], 2)
-
+        mask.drawMask(img, [0,0,255])
         counter.drawLanes(img)
 
         cv2.putText(img, instructions, (20,30), cv2.FONT_HERSHEY_TRIPLEX, 0.5, (255,255,255))
@@ -85,7 +81,6 @@ if __name__ == "__main__":
     		extra = ''
     		if key == 109:	# Press [m] to go step 1 (new mask)
     			step = 1
-                maskVertices = []
     			instructions = '[CLICK] Add vertices  -  [ENTER] Save & Finish'
             if key == 99:	# Press [c] to go step 2 (new counter)
     			step = 2
@@ -96,6 +91,7 @@ if __name__ == "__main__":
         elif step == 1:
     		if key == 13:
     			if len(maskVertices) == 2:
+                    mask.appendVertices(maskVertices)
     				step = 0
     				instructions = '[m] Add mask or [c] Add counter'
     				extra = ''
@@ -186,9 +182,7 @@ if __name__ == "__main__":
 
 
         if key == 115:  #Press [s] to save all geometries
-            #Save mask to maskGeom.pickle
-            with open('config-files/maskGeom.pickle', 'wb') as handle:
-                pickle.dump(maskVertices, handle, protocol = pickle.HIGHEST_PROTOCOL )
+            mask.saveMask("config-file/maskConfig.pickle")
             #Save lanes[] to counterGeom.pickle
             with open('config-files/counterConfig.pickle', 'wb') as handle:
                 counter.append(lanes)

@@ -10,6 +10,7 @@ import os.path
 import sys
 import pickle
 import counter
+import utils
 
 from ctypes import *
 from detection import *
@@ -24,33 +25,10 @@ import sort
 with open('config-files/YOLOdict.pickle', 'rb') as handle:
     YOLOdict = pickle.load(handle)
 
-try:
-    with open('config-files/maskGeom.pickle') as handle:
-        mask = pickle.load(handle)
-except:
-    print("Oops! I couldn't find mask.pickle file... Make sure to run config.py to define it")
+mask = utils.Mask()
+mask.loadMask("config-files/maskConfig.pickle")
 
 counter = counter.loadCounter("config-files/counterConfig.pickle")
-
-#-----------------------------
-#<-------- Functions -------->
-#-----------------------------
-def drawRoi(bbox, img, color):
-    pt1 = (bbox[0], bbox[1])
-    pt2 = (bbox[2], bbox[3])
-
-    cv2.rectangle(img, pt1, pt2, color, 3)
-
-def drawCounter(counter, img, color, t):
-    yAddjust = t * 350
-
-    cv2.rectangle(img, (img.shape[1]-250, 50+yAddjust), (img.shape[1]-50, 50+300+yAddjust), color, -1)
-    cv2.putText(img, "Counter", (img.shape[1]-230, 100+yAddjust), cv2.FONT_HERSHEY_SIMPLEX, 1, [255, 255, 255], 6)
-
-    for num, key in enumerate(counter):
-        keyStr = str(list(YOLOdict.keys())[list(YOLOdict.values()).index(key)])
-        value = str(counter.get(key))
-        cv2.putText(img, keyStr+": "+value, (img.shape[1]-230, 160+40*num+yAddjust), cv2.FONT_HERSHEY_SIMPLEX, 1, [255,255,255], 4)
 
 
 #-----------------------------
@@ -80,7 +58,7 @@ if __name__ == "__main__":
     meta = load_meta(b"darknet/cfg/coco.data")
     cv2.namedWindow("img", cv2.WINDOW_GUI_NORMAL)
 
-    roibbox = np.array([mask[0][0], mask[0][1], mask[1][0], mask[1][1]])
+    roibbox = np.array(mask.getVertices())
 
     ###MAIN LOOP
     while(1):
@@ -97,7 +75,7 @@ if __name__ == "__main__":
         mot_tracker.draw(track_bbs_ids, roi, [0,255,0])
         img[roibbox[1]:roibbox[3], roibbox[0]:roibbox[2]] = roi
 
-        drawRoi(roibbox, img, [0,0,255])
+        mask.drawMask(img, [0,0,255])
 
         counter.drawCounter(img)
 
