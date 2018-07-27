@@ -68,7 +68,7 @@ if __name__ == "__main__":
         r = detect_numpy(net, meta, roi)                          #YOLO detection
         track_bbs_ids = mot_tracker.update(r)                     #SORT tracking
         centers = mot_tracker.get_centers()                       #SORT object centers
-        counter.intersections(centers)                            #Counter intersection
+        counter.count(centers)                                    #Counter count
 
         counter.drawLanes(roi)
 
