@@ -5,6 +5,17 @@ import numpy as np
 import pickle
 import os.path
 
+#-----------------------------
+#<-------- Functions -------->
+#-----------------------------
+def bboxToCenter(bbox):       #bbox = [xmin, ymin, xmax, ymax]
+    x, y = bbox[0], bbox[1]
+    width, height = (bbox[2] - bbox[0]), (bbox[3], bbox[1])
+
+    center = [x + width/2, y + height/2]
+
+    return center
+
 
 #-----------------------------
 #<--------- Classes --------->
