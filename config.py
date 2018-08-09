@@ -29,7 +29,7 @@ laneVERTICES = []
 
 mask = utils.Mask()
 mask.loadMask("config-files/maskConfig.pickle")
-counter = loadCounter("config-files/counterConfig.pickle")
+counter = counter.loadCounter("config-files/counterConfig.pickle")
 
 #-----------------------------
 #<-------- Functions -------->
@@ -171,7 +171,7 @@ if __name__ == "__main__":
         elif step == 9:
     		if key == 13:
     			if len(laneVERTICES) == 2:
-                    lanes.append([lane.ID, lane.NAME, lane.TYPE, lane.VERTICES])
+                    lanes.append([laneID, laneNAME, laneTYPE, laneVERTICES])
     				step = 5
     				instructions = '[+] Add new lane'
     				extra = ''

@@ -17,7 +17,7 @@ class Mask:
         if(os.path.exists(path)):
             with open(path, 'rb') as handle:
                 maskConfig = pickle.load(handle)
-                appendVertices(maskConfig)
+                self.appendVertices(maskConfig)
 
         return self.VERTICES
 
@@ -29,12 +29,11 @@ class Mask:
         return self.VERTICES
 
     def appendVertices(self, vertices):
-        self.VERTICES = []
-        self.VERTICES.append(vertices)
+        self.VERTICES = vertices
 
     def drawMask(self, img, color):
         if(len(self.VERTICES) > 0):
-            pt1 = (self.VERTICES[0][0][0], self.VERTICES[0][0][1])
-            pt2 = (self.VERTICES[0][1][0], self.VERTICES[0][1][1])
+            pt1 = (self.VERTICES[0][0], self.VERTICES[0][1])
+            pt2 = (self.VERTICES[1][0], self.VERTICES[1][1])
 
             cv2.rectangle(img, pt1, pt2, color, 3)

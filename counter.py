@@ -97,8 +97,8 @@ class SimpleCounter:
         return self.counter
 
     def drawLanes(self, img):
-        if (len(lanes) > 0):
-            for lane in lanes:
+        if (len(self.lanes) > 0):
+            for lane in self.lanes:
                 cv2.line(img, tuple(lane[3][0][0]), tuple(lane[3][0][1]), [0,255,0], 1)
 
     def drawCounter(self, img):
@@ -133,9 +133,9 @@ class ComplexCounter:
             self.dictCounter[value] = 0
 
     def appendLane(self, lane):
-        if (lane[2] == 1):
+        if (lane.TYPE == 1):
             self.lanes_in.append(lane)
-        elif (lane[2] == 0):
+        elif (lane.TYPE == 2):
             self.lanes_out.append(lane)
 
     def initCounter(self):
@@ -208,24 +208,23 @@ class ComplexCounter:
         return self.counter
 
     def drawLanes(self, img):
-        if (len(lanes) > 0):
-            for lane in lanes:
-                if (lane.type == 1):
-                    cv2.line(img, tuple(lane[3][0][0]), tuple(lane[3][0][1]), [0,255,0], 1)
-                elif (lane.type == 2):
-                    cv2.line(img, tuple(lane[3][0][0]), tuple(lane[3][0][1]), [0,0,255], 1)
-
+        if (len(self.lanes_in) > 0):
+            for laneIn in self.lanes_in:
+                cv2.line(img, tuple(laneIn.VERTICES[0]), tuple(laneIn.VERTICES[1]), [0,255,0], 1)
+        if (len(self.lanes_out) > 0):
+            for laneOut in self.lanes_out:
+                cv2.line(img, tuple(laneOut.VERTICES[0]), tuple(laneOut.VERTICES[1]), [0,0,255], 1)
 
 def loadCounter(path):
-    if (os.path.exists("config-files/counterConfig.pickle")):
-        with open('config-files/counterConfig.pickle', 'rb') as handle:
+    if (os.path.exists(path)):
+        with open(path, 'rb') as handle:
             counterConfig = pickle.load(handle)
             if (counterConfig[2] == 0):
                 counter = simpleCounter(counterConfig[0], counterConfig[1])
             else:
                 counter = complexCounter(counterConfig[0], counterConfig[1])
 
-            for lane in counter[3]:
+            for lane in counterConfig[3]:
                 counter.appendLane( Lane(lane[0], lane[1], lane[2], lane[3]) )
 
     else:
