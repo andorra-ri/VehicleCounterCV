@@ -65,11 +65,11 @@ if __name__ == "__main__":
         r = detect_numpy(net, meta, roi)                          #YOLO detection
 
         if(len(r) > 0):
-            tracker.update(r)
-            tracker.draw(roi, [0, 255, 0])
-
-        #counter.count(centers)                                    #Counter count
-        #counter.drawLanes(roi)
+            tracker.update(r)                                     #Update tracking postion
+            tracker.draw(roi, [0, 255, 0])                        #Draw tracked objects
+            centers = tracker.getCenters()                        #Get centers of tracked objects
+            counter.count(centers)                                #Count objects
+            counter.drawLanes(roi)                                #Draw virtual lanes
 
         img[roibbox[0][1]:roibbox[1][1], roibbox[0][0]:roibbox[1][0]] = roi
 
