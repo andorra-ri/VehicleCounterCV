@@ -165,7 +165,7 @@ class Tracker(object):
 
             if(assignment[i] != -1):
                 self.tracks[i].skipped_frames = 0
-                bbox = detections[un_assigned_detects[i]][:4]
+                bbox = detections[assignment[i]][:4]
                 center = utils.bboxToCenter(bbox)
                 self.tracks[i].prediction = self.tracks[i].KF.correct(center, 1)
             else:
