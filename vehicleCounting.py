@@ -65,11 +65,8 @@ if __name__ == "__main__":
         r = detect_numpy(net, meta, roi)                          #YOLO detection
 
         if(len(r) > 0):
-            tracker.Update(r)
-
-            for i in range(len(tracker.tracks)):
-                if (len(tracker.tracks[i].trace) > 1):
-                    print(tracker.tracks[i].trace)
+            tracker.update(r)
+            tracker.draw(roi, [0, 255, 0])
 
         #counter.count(centers)                                    #Counter count
         #counter.drawLanes(roi)

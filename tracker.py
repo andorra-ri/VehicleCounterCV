@@ -8,7 +8,9 @@
     Python Version    : 3.5
 '''
 
-# Import python libraries
+#-----------------------------
+#<-------- Libraries -------->
+#-----------------------------
 import numpy as np
 import utils
 from kalman_filter import KalmanFilter
@@ -16,6 +18,16 @@ from common import dprint
 from scipy.optimize import linear_sum_assignment
 
 
+#-----------------------------
+#<------ Configuration ------>
+#-----------------------------
+with open('config-files/YOLOdict.pickle', 'rb') as handle:
+    YOLOdict = pickle.load(handle)
+
+
+#-----------------------------
+#<--------- Classes --------->
+#-----------------------------
 class Track(object):
     """Track class for every object to be tracked
     Attributes:
@@ -34,7 +46,7 @@ class Track(object):
         self.ID = Track.counter                       # identification of each track object
         self.TYPE = type
         self.KF = KalmanFilter()                      # KF instance to track this object
-        self.prediction = np.asarray(center)      # predicted centroids (x,y)
+        self.prediction = np.asarray(center)          # predicted centroids (x,y)
         self.skipped_frames = 0                       # number of frames skipped undetected
         self.trace = []                               # trace path
         self.bbox = []
@@ -63,7 +75,7 @@ class Tracker(object):
         self.max_trace_length = max_trace_length
         self.tracks = []
 
-    def Update(self, detections):
+    def update(self, detections):
         """Update tracks vector using following steps:
             - Create tracks if no tracks vector found
             - Calculate cost using sum of square distance
@@ -168,6 +180,7 @@ class Tracker(object):
                 bbox = detections[assignment[i]][:4]
                 center = utils.bboxToCenter(bbox)
                 self.tracks[i].prediction = self.tracks[i].KF.correct(center, 1)
+                self.tracks[i].bbox.append(bbox)
             else:
                 self.tracks[i].prediction = self.tracks[i].KF.correct(np.array([[0], [0]]), 0)
 
@@ -177,3 +190,24 @@ class Tracker(object):
 
             self.tracks[i].trace.append(self.tracks[i].prediction)
             self.tracks[i].KF.lastResult = self.tracks[i].prediction
+
+    def draw(self, img, color):
+        """Draw bbox of tracked objects:
+            - Draw bbox as a rectangle for each obejct
+            - Draw ID and type of object as a text above the bbox
+        Args:
+            img: cv2 image in which to draw
+            color: color to draw bbox
+        Return:
+            None
+        """
+
+        for i in range(len(self.tracks)):
+            bbox = self.tracks[i].bbox[-1]
+            xmin, ymin, xmax, ymax = int(bbox[0]), int(bbox[1]), int(bbox[2]), int(bbox[3])
+            pt1 = (xmin, ymin)
+            pt2 = (xmax, ymax)
+            if(len(bbox) == 6):
+                otype = list(YOLOdict.keys())[list(YOLOdict.values()).index(self.tracks[i].TYPE)]
+                cv2.rectangle(img, pt1, pt2, color, 1)
+                cv2.putText(img, otype+str(self.tracks[i].ID), (pt1[0], pt1[1] + 30), cv2.FONT_HERSHEY_SIMPLEX, 1, color, 6)
