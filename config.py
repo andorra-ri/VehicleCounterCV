@@ -58,7 +58,7 @@ def mouseClicked(event, x, y, flags, param):
 #-----------------------------
 if __name__ == "__main__":
     #Load video here
-    cap = cv2.VideoCapture('videos/testSalou.mp4')
+    cap = cv2.VideoCapture('videos/testRotonda.mp4')
     ret, img = cap.read()
     cv2.namedWindow("img", cv2.WINDOW_GUI_NORMAL)
     cv2.setMouseCallback('img', mouseClicked)
@@ -68,113 +68,113 @@ if __name__ == "__main__":
         ret, img = cap.read()
 
         mask.drawMask(img, [0,0,255])
-        counter.drawLanes(img)
+        #counter.drawLanes(img)
 
         cv2.putText(img, instructions, (20,30), cv2.FONT_HERSHEY_TRIPLEX, 0.5, (255,255,255))
-	    cv2.putText(img, extra, (20,55), cv2.FONT_HERSHEY_DUPLEX, 0.7, (255,255,255))
+        cv2.putText(img, extra, (20,55), cv2.FONT_HERSHEY_DUPLEX, 0.7, (255,255,255))
 
         cv2.imshow("img", img)
 
-        key = cv2.waitKey(1) & 0xFF
+        key = cv2.waitKey(0) & 0xFF
         #Idle
-    	if step == 0:
-    		extra = ''
-    		if key == 109:	# Press [m] to go step 1 (new mask)
-    			step = 1
-    			instructions = '[CLICK] Add vertices  -  [ENTER] Save & Finish'
-            if key == 99:	# Press [c] to go step 2 (new counter)
-    			step = 2
+        if step == 0:
+            extra = ''
+            if key == 109:     # Press [m] to go step 1 (new mask)
+                step = 1
+                instructions = '[CLICK] Add vertices  -  [ENTER] Save & Finish'
+            if key == 99:      # Press [c] to go step 2 (new counter)
+                step = 2
                 counter = []
-    			instructions = '[0-9] Enter ID  -  [ENTER] Save & Finish'
+                instructions = '[0-9] Enter ID  -  [ENTER] Save & Finish'
 
         # Add vertices to the mask
         elif step == 1:
-    		if key == 13:
-    			if len(maskVertices) == 2:
+            if key == 13:
+                if len(maskVertices) == 2:
                     mask.appendVertices(maskVertices)
-    				step = 0
-    				instructions = '[m] Add mask or [c] Add counter'
-    				extra = ''
+                    step = 0
+                    instructions = '[m] Add mask or [c] Add counter'
+                    extra = ''
 
-    	# Counter ID
+        # Counter ID
         elif step == 2:
-    		if key == 13:	# Press ENTER to go step 3 (new counter name)
-    			step = 3
-    			instructions = '[a-z]: Enter NAME -  [ENTER] Save & Finish'
-    		elif key is not 255:		# Enter numeric ID
-    			counterID += chr(key%256)
+            if key == 13:	# Press ENTER to go step 3 (new counter name)
+                step = 3
+                instructions = '[a-z]: Enter NAME -  [ENTER] Save & Finish'
+            elif key is not 255:		# Enter numeric ID
+                counterID += chr(key%256)
                 counter.append(counterID)
-    			extra = counterID
+                extra = counterID
 
         # Counter NAME
         elif step == 3:
-    		if key == 13:    # Press ENTER to go step 4 (new counter type)
-    			step = 4
-    			instructions = 'Enter Type: [0] SIMPLE  [1] COMPLEX -  [ENTER] Save & Finish'
-    		elif key is not 255:		# Enter numeric ID
-    			counterNAME += chr(key%256)
+            if key == 13:    # Press ENTER to go step 4 (new counter type)
+                step = 4
+                instructions = 'Enter Type: [0] SIMPLE  [1] COMPLEX -  [ENTER] Save & Finish'
+            elif key is not 255:		# Enter numeric ID
+                counterNAME += chr(key%256)
                 counter.append(counterNAME)
-    			extra = counterNAME
+                extra = counterNAME
 
         # Counter TYPE
         elif step == 4:
-    		if key == 13:    # Press ENTER to go step 5 (new counter type)
-    			step = 5
+            if key == 13:    # Press ENTER to go step 5 (new counter type)
+                step = 5
                 counter.append(counterTYPE)
-    			instructions = '[+] Add new lane'
+                instructions = '[+] Add new lane'
                 counterID = ''
                 counterNAME = ''
                 counterTYPE = ''
                 lanes = []
-    		elif key == 115:
-    			counterTYPE = 0
+            elif key == 115:
+                counterTYPE = 0
             elif key == 99:
-    			counterTYPE = 1
+                counterTYPE = 1
 
-    	# New lane
+        # New lane
         elif step == 5:
-    		if key == ord('+'):
+            if key == ord('+'):
                 step = 6
-			    instructions = '[0-9] Enter laneID  -  [ENTER] Save & Finish'
+                instructions = '[0-9] Enter laneID  -  [ENTER] Save & Finish'
 
         # Lane ID
         elif step == 6:
-    		if key == 13:    # Press ENTER to go step 7 (new lane name)
-    			step = 7
-    			instructions = '[a-z]: Enter NAME -  [ENTER] Save & Finish'
-    		elif key is not 255:		# Enter numeric ID
-    			laneID += chr(key%256)
-    			extra = laneID
+            if key == 13:    # Press ENTER to go step 7 (new lane name)
+                step = 7
+                instructions = '[a-z]: Enter NAME -  [ENTER] Save & Finish'
+            elif key is not 255:		# Enter numeric ID
+                laneID += chr(key%256)
+                extra = laneID
 
         # Lane NAME
         elif step == 7:
-    		if key == 13:    # Press ENTER to go step 8 (new lane type)
-    			step = 8
-    			instructions = 'Enter Type: [0] INDIFERENT  [1] IN  [2] OUT  -  [ENTER] Save & Finish'
-    		elif key is not 255:    # Enter numeric ID
-    			laneNAME += chr(key%256)
-    			extra = laneNAME
+            if key == 13:    # Press ENTER to go step 8 (new lane type)
+                step = 8
+                instructions = 'Enter Type: [0] INDIFERENT  [1] IN  [2] OUT  -  [ENTER] Save & Finish'
+            elif key is not 255:    # Enter numeric ID
+                laneNAME += chr(key%256)
+                extra = laneNAME
 
         # Lane TYPE
         elif step == 8:
-    		if key == 13:    # Press ENTER to go step 9 (new lane vertices)
-    			step = 9
-    			instructions = '[CLICK] Add vertices  -  [ENTER] Save & Finish'
-    		elif key is 48:
-    			laneTYPE = 0
+            if key == 13:    # Press ENTER to go step 9 (new lane vertices)
+                step = 9
+                instructions = '[CLICK] Add vertices  -  [ENTER] Save & Finish'
+            elif key is 48:
+                laneTYPE = 0
             elif key is 49:
-    			laneTYPE = 1
+                laneTYPE = 1
             elif key is 50:
-    			laneTYPE = 2
+                laneTYPE = 2
 
-    	# Lane VERTICES
+        # Lane VERTICES
         elif step == 9:
-    		if key == 13:
-    			if len(laneVERTICES) == 2:
+            if key == 13:
+                if len(laneVERTICES) == 2:
                     lanes.append([laneID, laneNAME, laneTYPE, laneVERTICES])
-    				step = 5
-    				instructions = '[+] Add new lane'
-    				extra = ''
+                    step = 5
+                    instructions = '[+] Add new lane'
+                    extra = ''
                     laneID = ''
                     laneNAME = ''
                     laneTYPE = ''
@@ -182,12 +182,12 @@ if __name__ == "__main__":
 
 
         if key == 115:  #Press [s] to save all geometries
-            mask.saveMask("config-file/maskConfig.pickle")
+            mask.saveMask('config-files/maskConfig.pickle')
             #Save lanes[] to counterGeom.pickle
             with open('config-files/counterConfig.pickle', 'wb') as handle:
                 counter.append(lanes)
                 pickle.dump(counter, handle, protocol = pickle.HIGHEST_PROTOCOL )
 
 
-    	if key == 27:    # Press ESC to quit
-    		break
+        if key == 27:    # Press ESC to quit
+            break

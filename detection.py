@@ -201,8 +201,8 @@ def detect_numpy(net, meta, image, thresh=.3, hier_thresh=.5, nms=.45):
             if dets[j].prob[i] > 0:
                 b = dets[j].bbox
                 intType = YOLOdict.get(meta.names[i].decode('utf-8'))
-                if(intType == None): intType = 5
-                res.append(((b.x - b.w/2), (b.y - b.h/2), (b.x + b.w/2), (b.y + b.h/2), intType))
+                if(intType != None):
+                    res.append(((b.x - b.w/2), (b.y - b.h/2), (b.x + b.w/2), (b.y + b.h/2), intType))
     free_detections(dets, num)
     r =np.array(res)
     return r

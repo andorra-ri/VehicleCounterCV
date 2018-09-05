@@ -12,7 +12,7 @@ import pickle
 import counter
 import utils
 
-from tracker import Tracker
+from track import TrackerFacade
 from ctypes import *
 from detection import *
 
@@ -34,13 +34,13 @@ counter = counter.loadCounter("config-files/counterConfig.pickle")
 #-----------------------------
 if __name__ == "__main__":
     #Load video here
-    cap = cv2.VideoCapture('videos/testSalou.mp4')
+    cap = cv2.VideoCapture('videos/testRotonda.mp4')
     #Should we resize the video frame?
     #cap.set(3, 1280)
     #cap.set(4, 720)
 
     #Instance of sort
-    tracker = Tracker(160, 30, 5)
+    trackerFacade = TrackerFacade()
 
     #Instance of simpleCounter
     counter.initCounter()
@@ -65,11 +65,8 @@ if __name__ == "__main__":
         r = detect_numpy(net, meta, roi)                          #YOLO detection
 
         if(len(r) > 0):
-            tracker.update(r)                                     #Update tracking postion
-            tracker.draw(roi, [0, 255, 0])                        #Draw tracked objects
-            centers = tracker.getCenters()                        #Get centers of tracked objects
-            counter.count(centers)                                #Count objects
-            counter.drawLanes(roi)                                #Draw virtual lanes
+            trackerFacade.update(r, 300)                          #Track detections
+            trackerFacade.draw(roi, [0, 255, 0])
 
         img[roibbox[0][1]:roibbox[1][1], roibbox[0][0]:roibbox[1][0]] = roi
 
