@@ -32,7 +32,7 @@ class Tracker:
             self.kalman.processNoiseCov = np.array([[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]],np.float32) * 0.03
             self.kalman.statePre = np.array([[center[0]],[center[1]],[0],[0]],np.float32)
 
-            self.update(bbox[-1])
+            self.update(center)
 
 
         # Update vehicle's properties
@@ -65,7 +65,7 @@ class Tracker:
 
         # Draw vehicle's properties
         def draw(self, img, color):
-            xmin, ymin, xmax, ymax = int(self.bbox[0]), int(self.bbox[1]), int(self.bbox[2]), int(self.bbox[3])
+            xmin, ymin, xmax, ymax = int(self.bbox[-1][0]), int(self.bbox[-1][1]), int(self.bbox[-1][2]), int(self.bbox[-1][3])
             pt1 = (xmin, ymin)
             pt2 = (xmax, ymax)
             cv2.rectangle(img, pt1, pt2, color, 1)
@@ -113,7 +113,7 @@ class TrackerFacade:
             else:
 
                 costMatrix = self.distanceCostMatrix(detections)
-                row_ind, col_ind = linear_sum_assignment(cost)      # Hungarian method for assignment
+                row_ind, col_ind = linear_sum_assignment(costMatrix)      # Hungarian method for assignment
 
 
                 assignment = np.full(len(self.trackers), -1, dtype = int)
@@ -155,7 +155,7 @@ class TrackerFacade:
                 # Start new trackers
                 if(len(un_assigned_detects) != 0):
                     for i in range(len(un_assigned_detects)):
-                        vehicle = Tracker(detection[:4], detection[4])
+                        vehicle = Tracker(detections[un_assigned_detects[i]][:4], detections[un_assigned_detects[i]][4])
                         self.trackers.append(vehicle)
 
 
@@ -174,5 +174,5 @@ class TrackerFacade:
 
 
         def draw(self, img, color):
-            for vehicle in self.vehicles:
+            for vehicle in self.trackers:
                 vehicle.draw(img, color)

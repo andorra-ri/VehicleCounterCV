@@ -40,7 +40,7 @@ if __name__ == "__main__":
     #cap.set(4, 720)
 
     #Instance of sort
-    trackerFacade = TrackerFacade()
+    trackerFacade = TrackerFacade(50, 10)
 
     #Instance of simpleCounter
     counter.initCounter()
@@ -65,7 +65,7 @@ if __name__ == "__main__":
         r = detect_numpy(net, meta, roi)                          #YOLO detection
 
         if(len(r) > 0):
-            trackerFacade.update(r, 300)                          #Track detections
+            trackerFacade.update(r)                          #Track detections
             trackerFacade.draw(roi, [0, 255, 0])
 
         img[roibbox[0][1]:roibbox[1][1], roibbox[0][0]:roibbox[1][0]] = roi
