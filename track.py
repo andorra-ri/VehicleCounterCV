@@ -92,14 +92,12 @@ class TrackerFacade:
             cost = np.zeros(shape=(N, M))
             for i in range(len(self.trackers)):
                 for j in range(len(detections)):
-                    try:
                         center = utils.bboxToCenter(detections[j][:4])
-                        diff = self.trackers[i].prediction[-1] - center
-                        distance = np.sqrt(diff[0][0]*dif[0][0] + diff[1][0]*diff[1][0])
+                        predictions = self.trackers[i].prediction[-1]
+                        diff = [prediction[0]-center[0], prediction[1]-center[1]]
+                        distance = np.sqrt(diff[0] ** 2 + diff[1] ** 2)
                         cost[i][j] = distance
-                    except:
-                        pass
-
+            
             return cost
 
 
