@@ -141,7 +141,7 @@ class TrackerFacade:
                         cos = utils.cosineBetweenTwoVectors(referenceVector, testVector)
 
                         if(cos > 0):
-                            value = distance * (1-cos)
+                            value = distance * (2-cos)
                         else:
                             value = 100000
 
