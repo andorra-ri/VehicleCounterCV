@@ -123,7 +123,7 @@ class TrackerFacade:
             return cost
 
 
-        def distanceCosinusCostMatrix(self, detections):
+        def distanceCosineCostMatrix(self, detections):
             N = len(self.trackers)
             M = len(detections)
             cost = np.zeros(shape=(N, M))
@@ -138,7 +138,7 @@ class TrackerFacade:
                         testVector = detectionCenter - previousCenter
 
                         distance = utils.distanceBetweenTwoPoints(centerDetection, centerPrediction)
-                        cos = utils.cosinusBetweenTwoVectors(referenceVector, testVector)
+                        cos = utils.cosineBetweenTwoVectors(referenceVector, testVector)
 
                         if(cos > 0):
                             value = distance * (1-cos)

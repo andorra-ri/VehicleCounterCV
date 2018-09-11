@@ -62,10 +62,12 @@ if __name__ == "__main__":
         ret, img = cap.read()
         roi = img[roibbox[0][1]:roibbox[1][1], roibbox[0][0]:roibbox[1][0]]
 
-        r = detect_numpy(net, meta, roi)                          #YOLO detection
+        detections = detect_numpy(net, meta, roi)                          #YOLO detection
+        cleanedDetections = cleanDetections(detections, 0.8)
 
-        if(len(r) > 0):
-            trackerFacade.update(r)                          #Track detections
+
+        if(len(cleanedDetections) > 0):
+            trackerFacade.update(cleanedDetections)                          #Track detections
             trackerFacade.draw(roi, [0, 255, 0])
 
         img[roibbox[0][1]:roibbox[1][1], roibbox[0][0]:roibbox[1][0]] = roi

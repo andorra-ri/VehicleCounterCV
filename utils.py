@@ -18,18 +18,21 @@ def bboxToCenter(bbox):       #bbox = [xmin, ymin, xmax, ymax]
 
     return center
 
+
 def distanceBetweenTwoPoints(point1, point2):
     diff = [point1[0]-point2[0], point1[1]-point2[1]]
     distance = np.sqrt(diff[0] ** 2 + diff[1] ** 2)
 
     return distance
 
+
 def moduleVector(vector):
     module = np.sqrt(vector[0]**2 + vector[1]**2)
 
     return module
 
-def cosinusBetweenTwoVectors(referenceVector, testVector):
+
+def cosineBetweenTwoVectors(referenceVector, testVector):
 
     dot = referenceVector[0]*testVector[0] + referenceVector[1]*testVector[1]
     det = (moduleVector(referenceVector) * moduleVector(testVector))
@@ -38,7 +41,19 @@ def cosinusBetweenTwoVectors(referenceVector, testVector):
 
     return(cos)
 
+def iou(bb_test,bb_gt):
 
+    xx1 = np.maximum(bb_test[0], bb_gt[0])
+    yy1 = np.maximum(bb_test[1], bb_gt[1])
+    xx2 = np.minimum(bb_test[2], bb_gt[2])
+    yy2 = np.minimum(bb_test[3], bb_gt[3])
+    w = np.maximum(0., xx2 - xx1)
+    h = np.maximum(0., yy2 - yy1)
+    wh = w * h
+    o = wh / ((bb_test[2]-bb_test[0])*(bb_test[3]-bb_test[1])
+        + (bb_gt[2]-bb_gt[0])*(bb_gt[3]-bb_gt[1]) - wh)
+
+    return(o)
 
 #-----------------------------
 #<--------- Classes --------->
