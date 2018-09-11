@@ -39,7 +39,7 @@ if __name__ == "__main__":
     #cap.set(3, 1280)
     #cap.set(4, 720)
 
-    #Instance of sort
+    #Instance of tracker
     trackerFacade = TrackerFacade(50, 10)
 
     #Instance of simpleCounter

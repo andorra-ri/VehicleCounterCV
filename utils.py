@@ -5,6 +5,7 @@ import numpy as np
 import pickle
 import os.path
 import cv2
+import math
 
 #-----------------------------
 #<-------- Functions -------->
@@ -16,6 +17,27 @@ def bboxToCenter(bbox):       #bbox = [xmin, ymin, xmax, ymax]
     center = [x + width/2, y + height/2]
 
     return center
+
+def distanceBetweenTwoPoints(point1, point2):
+    diff = [point1[0]-point2[0], point1[1]-point2[1]]
+    distance = np.sqrt(diff[0] ** 2 + diff[1] ** 2)
+
+    return distance
+
+def moduleVector(vector):
+    module = np.sqrt(vector[0]**2 + vector[1]**2)
+
+    return module
+
+def cosinusBetweenTwoVectors(referenceVector, testVector):
+
+    dot = referenceVector[0]*testVector[0] + referenceVector[1]*testVector[1]
+    det = (moduleVector(referenceVector) * moduleVector(testVector))
+
+    cos = dot/det
+
+    return(cos)
+
 
 
 #-----------------------------

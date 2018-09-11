@@ -1,3 +1,6 @@
+#-----------------------------
+#<-------- Libraries -------->
+#-----------------------------
 import math
 import cv2
 import numpy as np
@@ -5,10 +8,17 @@ import utils
 import pickle
 from scipy.optimize import linear_sum_assignment
 
+
+#-----------------------------
+#<------ Configuration ------>
+#-----------------------------
 with open('config-files/YOLOdict.pickle', 'rb') as handle:
     YOLOdict = pickle.load(handle)
 
 
+#-----------------------------
+#<--------- Classes --------->
+#-----------------------------
 class Tracker:
 
         counter = 0	 # Total vehicles count
@@ -53,6 +63,11 @@ class Tracker:
             return self.centers[-1]
 
 
+        # Return the last center prediction available
+        def prediction(self):
+            return self.predictions[-1]
+
+
         # Predict next vehicle's position using Kalman Filter
         def predictNext(self):
             center = np.array([[np.float32( self.centers[-1][0] )],[np.float32( self.centers[-1][1] )]])
@@ -86,31 +101,65 @@ class TrackerFacade:
             self.maxFramesSkipped = maxFramesSkipped
             self.trackers = []
 
-        def distanceCostMatrix(self, detections):
+
+        def iouCostMatrix(self, detections):
+            N = len(self.trackers)
+            M = len(detections)
+            cost = np.zeros(shape=(N, M))
+            for i in range(len(self.trackers)):
+                for i in range(len(detections)):
+                    xx1 = np.maximum(detections[j][0], self.trackers[i].bbox[-1][0])
+                    yy1 = np.maximum(detections[j][1], self.trackers[i].bbox[-1][1])
+                    xx2 = np.minimum(detections[j][2], self.trackers[i].bbox[-1][2])
+                    yy2 = np.minimum(detections[j][3], self.trackers[i].bbox[-1][3])
+                    w = np.maximum(0., xx2 - xx1)
+                    h = np.maximum(0., yy2 - yy1)
+                    wh = w * h
+                    o = wh / ((detections[j][2]-detections[j][0])*(detections[j][3]-detections[j][1])
+                      + (self.trackers[i].bbox[-1][2]-self.trackers[i].bbox[-1][0])*(self.trackers[i].bbox[-1][3]-self.trackers[i].bbox[-1][1]) - wh)
+
+                    cost[i][j] = o
+
+            return cost
+
+
+        def distanceCosinusCostMatrix(self, detections):
             N = len(self.trackers)
             M = len(detections)
             cost = np.zeros(shape=(N, M))
             for i in range(len(self.trackers)):
                 for j in range(len(detections)):
-                        center = utils.bboxToCenter(detections[j][:4])
-                        predictions = self.trackers[i].prediction[-1]
-                        diff = [prediction[0]-center[0], prediction[1]-center[1]]
-                        distance = np.sqrt(diff[0] ** 2 + diff[1] ** 2)
+
+                        detectionCenter = utils.bboxToCenter(detections[j][:4])
+                        predictionCenter = self.trackers[i].predictions[-1]
+                        previousCenter = self.trackers[i].center()
+
+                        referenceVector = predictionCenter - previousCenter
+                        testVector = detectionCenter - previousCenter
+
+                        distance = utils.distanceBetweenTwoPoints(centerDetection, centerPrediction)
+                        cos = utils.cosinusBetweenTwoVectors(referenceVector, testVector)
+
+                        if(cos > 0):
+                            value = distance * (1-cos)
+                        else:
+                            value = 100000
+
                         cost[i][j] = distance
-            
+
             return cost
 
 
         def update(self, detections):
 
-            if (len(self.trackers == 0)):
+            if (len(self.trackers) == 0):
                 for detection in detections:
                     vehicle = Tracker(detection[:4], detection[4])
                     self.trackers.append(vehicle)
 
             else:
 
-                costMatrix = self.distanceCostMatrix(detections)
+                costMatrix = self.distanceCosinusCostMatrix(detections)
                 row_ind, col_ind = linear_sum_assignment(costMatrix)      # Hungarian method for assignment
 
 
