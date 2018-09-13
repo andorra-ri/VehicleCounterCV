@@ -12,11 +12,9 @@ import pickle
 import counter
 import utils
 
+from track import TrackerFacade
 from ctypes import *
 from detection import *
-
-sys.path.insert(0, "sort/")
-import sort
 
 
 #-----------------------------
@@ -36,13 +34,13 @@ counter = counter.loadCounter("config-files/counterConfig.pickle")
 #-----------------------------
 if __name__ == "__main__":
     #Load video here
-    cap = cv2.VideoCapture('videos/testSalou.mp4')
+    cap = cv2.VideoCapture('videos/testRotonda.mp4')
     #Should we resize the video frame?
     #cap.set(3, 1280)
     #cap.set(4, 720)
 
-    #Instance of sort
-    mot_tracker = sort.Sort()
+    #Instance of tracker
+    trackerFacade = TrackerFacade(50, 10)
 
     #Instance of simpleCounter
     counter.initCounter()
@@ -64,19 +62,19 @@ if __name__ == "__main__":
         ret, img = cap.read()
         roi = img[roibbox[0][1]:roibbox[1][1], roibbox[0][0]:roibbox[1][0]]
 
-        r = detect_numpy(net, meta, roi)                          #YOLO detection
-        track_bbs_ids = mot_tracker.update(r)                     #SORT tracking
-        centers = mot_tracker.get_centers()                       #SORT object centers
-        counter.count(centers)                                    #Counter count
+        detections = detect_numpy(net, meta, roi)                          #YOLO detection
+        cleanedDetections = cleanDetections(detections, 0.8)
 
-        counter.drawLanes(roi)
 
-        mot_tracker.draw(track_bbs_ids, roi, [0,255,0])
+        if(len(cleanedDetections) > 0):
+            trackerFacade.update(cleanedDetections)                          #Track detections
+            trackerFacade.draw(roi, [0, 255, 0])
+
         img[roibbox[0][1]:roibbox[1][1], roibbox[0][0]:roibbox[1][0]] = roi
 
         mask.drawMask(img, [0,0,255])
 
-        counter.drawCounter(img)
+        #counter.drawCounter(img)
 
         cv2.imshow("img", img)
         out.write(img)
