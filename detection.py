@@ -7,6 +7,7 @@ import cv2
 import time
 import numpy as np
 import pickle
+import utils
 
 from ctypes import *
 
@@ -201,11 +202,25 @@ def detect_numpy(net, meta, image, thresh=.3, hier_thresh=.5, nms=.45):
             if dets[j].prob[i] > 0:
                 b = dets[j].bbox
                 intType = YOLOdict.get(meta.names[i].decode('utf-8'))
-                if(intType == None): intType = 5
-                res.append(((b.x - b.w/2), (b.y - b.h/2), (b.x + b.w/2), (b.y + b.h/2), dets[j].prob[i], intType))
+                if(intType != None):
+                    res.append(((b.x - b.w/2), (b.y - b.h/2), (b.x + b.w/2), (b.y + b.h/2), intType, dets[j].prob[i]))
     free_detections(dets, num)
     r =np.array(res)
     return r
+
+
+def cleanDetections(detections, iouThreshold):
+    for i in reversed(range(len(detections))):
+        for j in reversed(range(i)):
+            iou = utils.iou(detections[i][:4], detections[j][:4])
+            if(iou > iouThreshold):
+                if(detections[i][5]>detections[j][5]):
+                    detections.pop(j)
+                else:
+                    detection.pop(i)
+
+    return detections
+
 
 def drawDetections(bboxs, img, color):
     for bbox in bboxs:

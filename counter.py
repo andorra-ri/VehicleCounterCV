@@ -140,7 +140,7 @@ class ComplexCounter:
 
     def initCounter(self):
         for lane_in in self.lanes_in:
-            for lane_out in lanes_out:
+            for lane_out in self.lanes_out:
                 self.combinationLanes.append([lane_in, lane_out])
 
         self.counter = [self.dictCounter.copy() for k in range(len(self.combinationLanes))]
@@ -220,9 +220,9 @@ def loadCounter(path):
         with open(path, 'rb') as handle:
             counterConfig = pickle.load(handle)
             if (counterConfig[2] == 0):
-                counter = simpleCounter(counterConfig[0], counterConfig[1])
+                counter = SimpleCounter(counterConfig[0], counterConfig[1])
             else:
-                counter = complexCounter(counterConfig[0], counterConfig[1])
+                counter = ComplexCounter(counterConfig[0], counterConfig[1])
 
             for lane in counterConfig[3]:
                 counter.appendLane( Lane(lane[0], lane[1], lane[2], lane[3]) )
