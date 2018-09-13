@@ -41,19 +41,28 @@ def cosineBetweenTwoVectors(referenceVector, testVector):
 
     return(cos)
 
-def iou(bb_test,bb_gt):
+def iou(bb1,bb2):
+    # determine the (x, y)-coordinates of the intersection rectangle
+	xA = max(bb1[0], bb2[0])
+	yA = max(bb1[1], bb2[1])
+	xB = min(bb1[2], bb2[2])
+	yB = min(bb1[3], bb2[3])
 
-    xx1 = np.maximum(bb_test[0], bb_gt[0])
-    yy1 = np.maximum(bb_test[1], bb_gt[1])
-    xx2 = np.minimum(bb_test[2], bb_gt[2])
-    yy2 = np.minimum(bb_test[3], bb_gt[3])
-    w = np.maximum(0., xx2 - xx1)
-    h = np.maximum(0., yy2 - yy1)
-    wh = w * h
-    o = wh / ((bb_test[2]-bb_test[0])*(bb_test[3]-bb_test[1])
-        + (bb_gt[2]-bb_gt[0])*(bb_gt[3]-bb_gt[1]) - wh)
+	# compute the area of intersection rectangle
+	interArea = max(0, xB - xA + 1) * max(0, yB - yA + 1)
 
-    return(o)
+	# compute the area of both the prediction and ground-truth
+	# rectangles
+	boxAArea = (bb1[2] - bb1[0] + 1) * (bb1[3] - bb1[1] + 1)
+	boxBArea = (bb2[2] - bb2[0] + 1) * (bb2[3] - bb2[1] + 1)
+
+	# compute the intersection over union by taking the intersection
+	# area and dividing it by the sum of prediction + ground-truth
+	# areas - the interesection area
+	iou = interArea / float(boxAArea + boxBArea - interArea)
+
+	# return the intersection over union value
+	return iou
 
 #-----------------------------
 #<--------- Classes --------->

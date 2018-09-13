@@ -211,7 +211,7 @@ def detect_numpy(net, meta, image, thresh=.3, hier_thresh=.5, nms=.45):
 
 def cleanDetections(detections, iouThreshold):
     for i in reversed(range(len(detections))):
-        for j in reversed(range(i+1, len(detections))):
+        for j in reversed(range(i)):
             iou = utils.iou(detections[i][:4], detections[j][:4])
             if(iou > iouThreshold):
                 if(detections[i][5]>detections[j][5]):
