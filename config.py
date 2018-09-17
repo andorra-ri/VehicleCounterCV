@@ -10,6 +10,7 @@ import pickle
 import os.path
 import counter
 import utils
+import mask
 
 
 #-----------------------------
@@ -27,7 +28,7 @@ laneNAME = ''
 laneTYPE = ''
 laneVERTICES = []
 
-mask = utils.Mask()
+mask = mask.Mask()
 mask.loadMask("config-files/maskConfig.pickle")
 counter = counter.loadCounter("config-files/counterConfig.pickle")
 
@@ -91,7 +92,7 @@ if __name__ == "__main__":
         elif step == 1:
             if key == 13:
                 if len(maskVertices) == 2:
-                    mask.appendVertices(maskVertices)
+                    mask.setVertices(maskVertices)
                     step = 0
                     instructions = '[m] Add mask or [c] Add counter'
                     extra = ''

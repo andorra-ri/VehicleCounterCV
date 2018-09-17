@@ -12,6 +12,7 @@ import pickle
 import counter
 import utils
 import detection
+import mask
 
 from track import TrackerFacade
 from ctypes import *
@@ -23,7 +24,7 @@ from ctypes import *
 with open('config-files/YOLOdict.pickle', 'rb') as handle:
     YOLOdict = pickle.load(handle)
 
-mask = utils.Mask()
+mask = mask.Mask()
 mask.loadMask("config-files/maskConfig.pickle")
 
 counter = counter.loadCounter("config-files/counterConfig.pickle")
@@ -61,11 +62,13 @@ if __name__ == "__main__":
     while(1):
         ret, img = cap.read()
 
-        detections = detection.detect_numpy(net, meta, img)                          #YOLO detection
-        cleanedDetections = detection.cleanDetections(detections, roibbox, 0.8)
+        detections = detection.detect_numpy(net, meta, img)                             #YOLO detection
+        cleanedDetections = detection.cleanDetections(detections, roibbox, 0.8)         #Clean detections
 
         if(len(cleanedDetections) > 0):
-            trackerFacade.update(cleanedDetections)                          #Track detections
+            trackerFacade.update(cleanedDetections)                                     #Track detections
+            centersVectors = trackerFacade.getCenterVector()                            #Get array of the last two centers for each object
+            counter.count(centersVector)
             trackerFacade.draw(img, [0, 255, 0])
 
         mask.drawMask(img, [0,0,255])

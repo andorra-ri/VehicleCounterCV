@@ -220,6 +220,14 @@ class TrackerFacade:
                         self.trackers[i].update(center)
 
 
+        def getCentersVector():
+            centersVector = []
+            for trk in self.trackers:
+                centersVector.append([trk.id, trk.type, trk.centers[-1], trk.centers[-2]])
+
+            return centersVector
+
+
         def draw(self, img, color):
             for vehicle in self.trackers:
                 vehicle.draw(img, color)
