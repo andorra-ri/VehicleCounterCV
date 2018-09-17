@@ -17,6 +17,13 @@ def bboxToCenter(bbox):       #bbox = [xmin, ymin, xmax, ymax]
     center = [x + width/2, y + height/2]
 
     return center
+    
+
+def insideBbox(bboxReference, bboxTest):
+    if(bboxTest[0] < bboxReference[0] or bboxTest[1] < bboxReference[1] or bboxTest[2] > bboxReference[2] or bboxTest[3] > bboxReference[3]):
+        return False
+    else:
+        return True
 
 
 def distanceBetweenTwoPoints(point1, point2):

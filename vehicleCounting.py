@@ -11,10 +11,10 @@ import sys
 import pickle
 import counter
 import utils
+import detection
 
 from track import TrackerFacade
 from ctypes import *
-from detection import *
 
 
 #-----------------------------
@@ -55,22 +55,18 @@ if __name__ == "__main__":
     meta = load_meta(b"darknet/cfg/coco.data")
     cv2.namedWindow("img", cv2.WINDOW_GUI_NORMAL)
 
-    roibbox = np.array(mask.getVertices())
+    roibbox = mask.getVertices()
 
     ###MAIN LOOP
     while(1):
         ret, img = cap.read()
-        roi = img[roibbox[0][1]:roibbox[1][1], roibbox[0][0]:roibbox[1][0]]
 
-        detections = detect_numpy(net, meta, roi)                          #YOLO detection
-        cleanedDetections = cleanDetections(detections, 0.8)
-
+        detections = detection.detect_numpy(net, meta, img)                          #YOLO detection
+        cleanedDetections = detection.cleanDetections(detections, roibbox, 0.8)
 
         if(len(cleanedDetections) > 0):
             trackerFacade.update(cleanedDetections)                          #Track detections
-            trackerFacade.draw(roi, [0, 255, 0])
-
-        img[roibbox[0][1]:roibbox[1][1], roibbox[0][0]:roibbox[1][0]] = roi
+            trackerFacade.draw(img, [0, 255, 0])
 
         mask.drawMask(img, [0,0,255])
 

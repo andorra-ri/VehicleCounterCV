@@ -209,7 +209,13 @@ def detect_numpy(net, meta, image, thresh=.3, hier_thresh=.5, nms=.45):
     return r
 
 
-def cleanDetections(detections, iouThreshold):
+def detectionsInsideBbox(maskBbox, detections):
+    insideDetections = []
+    for det in detections:
+        if(utils.insideBbox(maskBbox, detections[det])):
+            insideDetections.append(detections[det])
+
+def iouBetweenDetections(detections, iouThreshold):
     for i in reversed(range(len(detections))):
         for j in reversed(range(i)):
             iou = utils.iou(detections[i][:4], detections[j][:4])
@@ -220,6 +226,13 @@ def cleanDetections(detections, iouThreshold):
                     detection.pop(i)
 
     return detections
+
+
+def cleanDetections(detections, maskBbox, iouThreshold):
+    cleanedDetections = detectionsInsideBbox(maskBbox, detections)
+    cleanedDetections = iouBetweenDetections(cleanedDetections, iouThreshold)
+
+    return cleanedDetections
 
 
 def drawDetections(bboxs, img, color):
