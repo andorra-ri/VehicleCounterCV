@@ -2,7 +2,7 @@
 #<-------- Libraries -------->
 #-----------------------------
 import numpy as np
-import pickle
+import json
 import os.path
 import cv2
 import math
@@ -18,16 +18,16 @@ class Mask:
 
     def loadMask(self, path):
         if(os.path.exists(path)):
-            with open(path, 'rb') as handle:
-                maskConfig = pickle.load(handle)
+            with open(path, 'r') as handle:
+                maskConfig = json.load(handle)
                 self.setVertices(maskConfig)
 
         return self.VERTICES
 
 
     def saveMask(self, path):
-        with open(path, 'wb') as handle:
-            pickle.dump(self.VERTICES, handle, protocol = pickle.HIGHEST_PROTOCOL )
+        with open(path, 'w') as handle:
+            json.dump(self.VERTICES, handle)
 
 
     def getVertices(self):

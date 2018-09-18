@@ -8,7 +8,7 @@ import time
 import numpy as np
 import os.path
 import sys
-import pickle
+import json
 import counter
 import utils
 import detection
@@ -21,13 +21,13 @@ from ctypes import *
 #-----------------------------
 #<------ Configuration ------>
 #-----------------------------
-with open('config-files/YOLOdict.pickle', 'rb') as handle:
-    YOLOdict = pickle.load(handle)
+with open('config-files/YOLOdict.json', 'r') as handle:
+    YOLOdict = json.load(handle)
 
 mask = mask.Mask()
-mask.loadMask("config-files/maskConfig.pickle")
+mask.loadMask("config-files/maskConfig.json")
 
-counter = counter.loadCounter("config-files/counterConfig.pickle")
+counter = counter.loadCounter("config-files/counterConfig.json")
 
 
 #-----------------------------

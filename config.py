@@ -6,7 +6,7 @@ import random
 import cv2
 import time
 import numpy as np
-import pickle
+import json
 import os.path
 import counter
 import utils
@@ -29,8 +29,8 @@ laneTYPE = ''
 laneVERTICES = []
 
 mask = mask.Mask()
-mask.loadMask("config-files/maskConfig.pickle")
-counter = counter.loadCounter("config-files/counterConfig.pickle")
+mask.loadMask("config-files/maskConfig.json")
+counter = counter.loadCounter("config-files/counterConfig.json")
 
 #-----------------------------
 #<-------- Functions -------->
@@ -183,11 +183,11 @@ if __name__ == "__main__":
 
 
         if key == 115:  #Press [s] to save all geometries
-            mask.saveMask('config-files/maskConfig.pickle')
-            #Save lanes[] to counterGeom.pickle
-            with open('config-files/counterConfig.pickle', 'wb') as handle:
+            mask.saveMask('config-files/maskConfig.json')
+            #Save lanes[] to counterGeom.json
+            with open('config-files/counterConfig.json', 'w') as handle:
                 counter.append(lanes)
-                pickle.dump(counter, handle, protocol = pickle.HIGHEST_PROTOCOL )
+                json.dump(counter, handle)
 
 
         if key == 27:    # Press ESC to quit

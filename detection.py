@@ -6,7 +6,7 @@ import random
 import cv2
 import time
 import numpy as np
-import pickle
+import json
 import utils
 
 from ctypes import *
@@ -15,8 +15,8 @@ from ctypes import *
 #-----------------------------
 #<------ Configuration ------>
 #-----------------------------
-with open('config-files/YOLOdict.pickle', 'rb') as handle:
-    YOLOdict = pickle.load(handle)
+with open('config-files/YOLOdict.json', 'r') as handle:
+    YOLOdict = json.load(handle)
 
 
 #-----------------------------

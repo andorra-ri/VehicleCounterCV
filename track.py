@@ -5,15 +5,15 @@ import math
 import cv2
 import numpy as np
 import utils
-import pickle
+import json
 from scipy.optimize import linear_sum_assignment
 
 
 #-----------------------------
 #<------ Configuration ------>
 #-----------------------------
-with open('config-files/YOLOdict.pickle', 'rb') as handle:
-    YOLOdict = pickle.load(handle)
+with open('config-files/YOLOdict.json', 'r') as handle:
+    YOLOdict = json.load(handle)
 
 
 #-----------------------------

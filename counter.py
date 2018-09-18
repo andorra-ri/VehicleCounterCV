@@ -5,15 +5,15 @@ import math
 import random
 import cv2
 import time
-import pickle
+import json
 import os.path
 
 
 #-----------------------------
 #<------ Configuration ------>
 #-----------------------------
-with open('config-files/YOLOdict.pickle', 'rb') as handle:
-    YOLOdict = pickle.load(handle)
+with open('config-files/YOLOdict.json', 'r') as handle:
+    YOLOdict = json.load(handle)
 
 
 #-----------------------------
@@ -96,6 +96,10 @@ class SimpleCounter:
         self.lanesCounter = dict.fromkeys(self.lanesCounter, 0)
 
 
+    def storeToMySQL(self):
+
+
+
 
 class TrackingCounter:
     def __init__(self, id, name):
@@ -172,8 +176,8 @@ class TrackingCounter:
 
 def loadCounter(path):
     if (os.path.exists(path)):
-        with open(path, 'rb') as handle:
-            counterConfig = pickle.load(handle)
+        with open(path, 'r') as handle:
+            counterConfig = json.load(handle)
             if (counterConfig[2] == 0):
                 counter = SimpleCounter(counterConfig[0], counterConfig[1])
             else:
