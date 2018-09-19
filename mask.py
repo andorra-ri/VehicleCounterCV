@@ -12,17 +12,13 @@ import math
 #<--------- Classes --------->
 #-----------------------------
 class Mask:
-    def __init__(self):
+    def __init__(self, path):
         self.VERTICES = []              #[[xmin,ymin], [xmax, ymax]]
 
-
-    def loadMask(self, path):
         if(os.path.exists(path)):
             with open(path, 'r') as handle:
                 maskConfig = json.load(handle)
                 self.setVertices(maskConfig)
-
-        return self.VERTICES
 
 
     def saveMask(self, path):

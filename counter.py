@@ -6,6 +6,7 @@ import random
 import cv2
 import time
 import json
+import sqlmanager
 import os.path
 
 
@@ -97,7 +98,8 @@ class SimpleCounter:
 
 
     def storeToMySQL(self):
-
+        # With the array of dict I should create de SQL statement: "INSERT INTO database...""
+        sqlmanager.executeInsertQuery(sqlStatement)
 
 
 

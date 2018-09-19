@@ -1,31 +1,21 @@
 #-----------------------------
 #<-------- Libraries -------->
 #-----------------------------
-import math
-import random
 import cv2
-import time
-import numpy as np
-import os.path
-import sys
-import json
 import counter
 import utils
 import detection
 import mask
+import sqlmanager
 
 from track import TrackerFacade
-from ctypes import *
 
 
 #-----------------------------
 #<------ Configuration ------>
 #-----------------------------
-with open('config-files/YOLOdict.json', 'r') as handle:
-    YOLOdict = json.load(handle)
-
-mask = mask.Mask()
-mask.loadMask("config-files/maskConfig.json")
+mask = mask.Mask("config-files/maskConfig.json"))
+db = sqlmanager.SQLManager("config-files/MySQLConfig.json")
 
 counter = counter.loadCounter("config-files/counterConfig.json")
 
