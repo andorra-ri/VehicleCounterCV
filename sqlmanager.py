@@ -1,47 +1,42 @@
 import mysql.connector
 
 class SQLManager:
+
     def __init__(self, pathToConfigFile):
         with open(pathToConfigFile, 'r') as handle:
             dbConfig = json.load(handle)
 
 
-    def initConnection(self):
+    def connect(self):
         try:
-            self.cnx = mysql.connector.coonect(**dbConfig)
+            self.conn = mysql.connector.connect(**dbConfig)
         except mysql.connector.Error as err:
             print(err)
 
 
-    def closeConnection(self):
-        self.cnx.close()
-
-
-    def executeInsertQuery(self, sqlStatement):
-        self.initConnection()
-        cursor = self.cnx.cursor()
-
+    def executeInsertQuery(self, sqlStatement, data):
         try:
+            cursor = self.conn.cursor()
+            cursor.executemany(sqlStatement, data)        #We use executemany because we will have more than one insert
+        except mysql.connector.Error as err:
+            self.connect()
+            cursor = self.conn.cursor()
+            cursor.executemany(sqlStatement, data)
+
+        return cursor
+
+
+    def executeQuery(self, sqlStatement):
+        try:
+            cursor = self.conn.cursor()
             cursor.execute(sqlStatement)
-            self.cnx.commit()
-            cursor.close()
-            self.closeConnection()
-        except MySQLdb.Error as err:
-            print(err)
+        except mysql.connector.Error as err:
+            self.connect()
+            cursor = self.conn.cursor()
+            cursor.execute(sqlStatement)
+
+        return cursor
 
 
-    def executeGetQuery(self, sqlStatement):
-        self.initConnection()
-        cursor = self.cnx.cursor()
-
-        try:
-            values = cursor.execute(sqlStatement)
-            self.cnx.commit()
-            cursor.close()
-            self.closeConnection()
-
-        except MySQLdb.Error as err:
-            print(err)
-
-
-        return values
+    def closeConnection(self):
+        self.cnn.close()

@@ -54,7 +54,11 @@ class SimpleCounter:
 
 
     def initCounter(self):
-        self.lanesCounter = [self.dictCounter.copy() for k in range(len(self.lanes))]
+        self.lanesCounter = []
+        for k in range(len(self.lanes)):
+            laneDict = self.dictCounter.copy()
+            laneDict["laneId"] = self.lanes[k].ID
+            self.lanesCounter.append(laneDict)
 
 
     def addCount(self, lane, type):
@@ -98,8 +102,11 @@ class SimpleCounter:
 
 
     def storeToMySQL(self):
-        # With the array of dict I should create de SQL statement: "INSERT INTO database...""
-        sqlmanager.executeInsertQuery(sqlStatement)
+
+        #We should ask to the sqlmanager class which tables does the database has and chose the appropiate
+
+        sql = "INSERT INTO `counters` ( `laneId`, `timestamp`, `person`, `bicycle`, `motorbike`, `car`, `truck`, `bus`) VALUES ( %(laneId)s, NOW(), %(person)s, %(bicycle)s, %(motorbike)s, %(car)s, %(truck)s,%(bus)s )"
+        sqlmanager.executeInsertQuery(sqlStatement, data)
 
 
 
