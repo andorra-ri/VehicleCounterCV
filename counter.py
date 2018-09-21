@@ -13,8 +13,8 @@ import os.path
 #-----------------------------
 #<------ Configuration ------>
 #-----------------------------
-with open('config-files/YOLOdict.json', 'r') as handle:
-    YOLOdict = json.load(handle)
+with open('config-files/YOLOobjects.json', 'r') as handle:
+    YOLOobjects = json.load(handle)
 
 
 #-----------------------------
@@ -43,10 +43,7 @@ class SimpleCounter:
         self.NAME = name
         self.lanes = []
         self.lanesCounter = []
-        self.dictCounter = {}            #Counter with the following structure: {type:counts, type:counts, ...}
-
-        for key, value in YOLOdict.items():
-            self.dictCounter[value] = 0
+        self.dictCounter = dict.fromkeys(YOLOobjects, 0) #Counter with the following structure: {type:counts, type:counts, ...}
 
 
     def appendLane(self, lane):
@@ -92,9 +89,8 @@ class SimpleCounter:
             cv2.putText(img, "Counter", (img.shape[1]-230, 100+yAddjust), cv2.FONT_HERSHEY_SIMPLEX, 1, [255, 255, 255], 6)
 
             for num, key in enumerate(count):
-                keyStr = str(list(YOLOdict.keys())[list(YOLOdict.values()).index(key)])
                 value = str(self.lanesCounter.get(key))
-                cv2.putText(img, keyStr+": "+value, (img.shape[1]-230, 160+40*num+yAddjust), cv2.FONT_HERSHEY_SIMPLEX, 1, [255,255,255], 4)
+                cv2.putText(img, key": "+value, (img.shape[1]-230, 160+40*num+yAddjust), cv2.FONT_HERSHEY_SIMPLEX, 1, [255,255,255], 4)
 
 
     def clear(self):
@@ -120,9 +116,7 @@ class TrackingCounter:
         self.counter = []
         self.dictCounter = {}            #Counter with the following structure: {type:counts, type:counts, ...}
         self.idsInside = []
-
-        for key, value in YOLOdict.items():
-            self.dictCounter[value] = 0
+        self.dictCounter = dict.fromkeys(YOLOobjects, 0)
 
 
     def appendLane(self, lane):

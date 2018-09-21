@@ -12,8 +12,7 @@ from scipy.optimize import linear_sum_assignment
 #-----------------------------
 #<------ Configuration ------>
 #-----------------------------
-with open('config-files/YOLOdict.json', 'r') as handle:
-    YOLOdict = json.load(handle)
+
 
 
 #-----------------------------
@@ -85,8 +84,7 @@ class Tracker:
             pt2 = (xmax, ymax)
             cv2.rectangle(img, pt1, pt2, color, 1)
             cv2.circle(img, (int(self.centers[-1][0]), int(self.centers[-1][1])), 2, (0,0,255))
-            otype = list(YOLOdict.keys())[list(YOLOdict.values()).index(self.TYPE)]
-            cv2.putText(img, str(otype)+'id: '+str(self.ID), (int(self.centers[-1][0]), int(self.centers[-1][1])), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255,255,255))
+            cv2.putText(img, str(self.TYPE)+'id: '+str(self.ID), (int(self.centers[-1][0]), int(self.centers[-1][1])), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255,255,255))
             '''for i in range(1, len(self.centers)):
                 cv2.line(img, (int(self.centers[i-1][0]), int(self.centers[i-1][1])), (int(self.centers[i][0]), int(self.centers[i][1])), (0,0,255), 1)
             for i in range(1, len(self.predictions)):
