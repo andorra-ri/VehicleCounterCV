@@ -104,6 +104,8 @@ class SimpleCounter:
         sql = "INSERT INTO `counters` ( `laneId`, `timestamp`, `person`, `bicycle`, `motorbike`, `car`, `truck`, `bus`) VALUES ( %(laneId)s, NOW(), %(person)s, %(bicycle)s, %(motorbike)s, %(car)s, %(truck)s,%(bus)s )"
         sqlmanager.executeInsertQuery(sqlStatement, data)
 
+        self.clear()
+
 
 
 class TrackingCounter:

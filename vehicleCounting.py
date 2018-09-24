@@ -7,6 +7,7 @@ import utils
 import detection
 import mask
 import sqlmanager
+import schedule
 
 from track import TrackerFacade
 
@@ -24,17 +25,20 @@ counter = counter.loadCounter("config-files/counterConfig.json")
 #<---------- Main ----------->
 #-----------------------------
 if __name__ == "__main__":
-    #Load video here
+    # Load video here
     cap = cv2.VideoCapture('videos/testRotonda.mp4')
-    #Should we resize the video frame?
-    #cap.set(3, 1280)
-    #cap.set(4, 720)
+    # Should we resize the video frame?
+    # cap.set(3, 1280)
+    # cap.set(4, 720)
 
-    #Instance of tracker
+    # Instance of tracker
     trackerFacade = TrackerFacade(50, 10)
 
-    #Instance of simpleCounter
+    # Initialize counter
     counter.initCounter()
+
+    # Define scheduler
+    schedule.every(5).minutes.do(counter.storeToMySQL())
 
     #Saving video
     frame_width = int(cap.get(3))
@@ -60,6 +64,8 @@ if __name__ == "__main__":
             centersVectors = trackerFacade.getCenterVector()                            #Get array of the last two centers for each object
             counter.count(centersVector)
             trackerFacade.draw(img, [0, 255, 0])
+
+        schedule.run_pending()
 
         mask.drawMask(img, [0,0,255])
 
