@@ -4,12 +4,14 @@ class SQLManager:
 
     def __init__(self, pathToConfigFile):
         with open(pathToConfigFile, 'r') as handle:
-            dbConfig = json.load(handle)
+            self.dbConfig = json.load(handle)
+            self.table = self.dbConfig["table"]
+            del self.dbConfig["table"]
 
 
     def connect(self):
         try:
-            self.conn = mysql.connector.connect(**dbConfig)
+            self.conn = mysql.connector.connect(**self.dbConfig)
         except mysql.connector.Error as err:
             print(err)
 
@@ -17,7 +19,7 @@ class SQLManager:
     def executeInsertQuery(self, sqlStatement, data):
         try:
             cursor = self.conn.cursor()
-            cursor.executemany(sqlStatement, data)        #We use executemany because we will have more than one insert
+            cursor.executemany(sqlStatement, data)
             self.conn.commit()
         except mysql.connector.Error as err:
             self.connect()
@@ -38,6 +40,10 @@ class SQLManager:
             cursor.execute(sqlStatement)
 
         return cursor
+
+
+    def getTable(self):
+        return self.table
 
 
     def closeConnection(self):

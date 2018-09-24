@@ -98,7 +98,6 @@ class SimpleCounter:
 
 
     def storeToMySQL(self):
-
         table = sqlmanager.getTable()
         dictKeys = list(self.dictCounter.keys())
         keysComSep = ', '.join(dictKeys)

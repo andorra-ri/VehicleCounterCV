@@ -1,1 +1,1 @@
-{"host": "theHost", "user": "myUser", "password": "myPsswrd", "database":"myDataBase"}
+{"host": "theHost", "user": "myUser", "password": "myPsswrd", "database":"myDataBase", "table": "myTable"}
