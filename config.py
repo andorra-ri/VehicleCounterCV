@@ -28,8 +28,7 @@ laneNAME = ''
 laneTYPE = ''
 laneVERTICES = []
 
-mask = mask.Mask()
-mask.loadMask("config-files/maskConfig.json")
+mask = mask.Mask(("config-files/maskConfig.json")
 counter = counter.loadCounter("config-files/counterConfig.json")
 
 #-----------------------------

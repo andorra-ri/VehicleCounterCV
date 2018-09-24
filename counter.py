@@ -14,7 +14,8 @@ import os.path
 #<------ Configuration ------>
 #-----------------------------
 with open('config-files/YOLOobjects.json', 'r') as handle:
-    YOLOobjects = json.load(handle)
+    fileConfig = json.load(handle)
+    YOLOobjects = fileConfig["YOLOobjects"]
 
 
 #-----------------------------
@@ -189,7 +190,7 @@ def loadCounter(path):
             if (counterConfig[2] == 0):
                 counter = SimpleCounter(counterConfig[0], counterConfig[1])
             else:
-                counter = ComplexCounter(counterConfig[0], counterConfig[1])
+                counter = TrackingCounter(counterConfig[0], counterConfig[1])
 
             for lane in counterConfig[3]:
                 counter.appendLane( Lane(lane[0], lane[1], lane[2], lane[3]) )

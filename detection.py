@@ -16,7 +16,8 @@ from ctypes import *
 #<------ Configuration ------>
 #-----------------------------
 with open('config-files/YOLOobjects.json', 'r') as handle:
-    YOLOobjects = json.load(handle)
+    fileConfig = json.load(handle)
+    YOLOobjects = fileConfig["YOLOobjects"]
 
 
 #-----------------------------
@@ -199,9 +200,9 @@ def detect_numpy(net, meta, image, thresh=.3, hier_thresh=.5, nms=.45):
     res = []
     for j in range(num):
         for i in range(meta.classes):
-            if (dets[j].prob[i] > 0 && (meta.names[i] in YOLOobjects)):          #probably we will need to add decode('utf-8') to meta.names
+            if (dets[j].prob[i] > 0 & (meta.names[i].decode('utf-8') in YOLOobjects)):          #probably we will need to add decode('utf-8') to meta.names
                 b = dets[j].bbox
-                res.append(((b.x - b.w/2), (b.y - b.h/2), (b.x + b.w/2), (b.y + b.h/2), meta.names[i], dets[j].prob[i]))
+                res.append(((b.x - b.w/2), (b.y - b.h/2), (b.x + b.w/2), (b.y + b.h/2), meta.names[i].decode('utf-8'), dets[j].prob[i]))
     free_detections(dets, num)
     r =np.array(res)
     return r
@@ -210,8 +211,10 @@ def detect_numpy(net, meta, image, thresh=.3, hier_thresh=.5, nms=.45):
 def detectionsInsideBbox(maskBbox, detections):
     insideDetections = []
     for det in detections:
-        if(utils.insideBbox(maskBbox, detections[det])):
-            insideDetections.append(detections[det])
+        if(utils.insideBbox(maskBbox, det)):
+            insideDetections.append(det)
+
+    return insideDetections
 
 def iouBetweenDetections(detections, iouThreshold):
     for i in reversed(range(len(detections))):
@@ -221,7 +224,7 @@ def iouBetweenDetections(detections, iouThreshold):
                 if(detections[i][5]>detections[j][5]):
                     detections.pop(j)
                 else:
-                    detection.pop(i)
+                    detections.pop(i)
 
     return detections
 
@@ -240,4 +243,4 @@ def drawDetections(bboxs, img, color):
         pt2 = (xmax, ymax)
         if(len(bbox) == 6):
             cv2.rectangle(img, pt1, pt2, color, 1)
-            cv2.putText(img, str(bbox[4]) (pt1[0], pt1[1] + 30), cv2.FONT_HERSHEY_SIMPLEX, 1, color, 6)
+            cv2.putText(img, str(bbox[4]), (pt1[0], pt1[1] + 30), cv2.FONT_HERSHEY_SIMPLEX, 1, color, 6)

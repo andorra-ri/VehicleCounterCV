@@ -132,10 +132,10 @@ class TrackerFacade:
                         predictionCenter = self.trackers[i].predictions[-1]
                         previousCenter = self.trackers[i].center()
 
-                        referenceVector = predictionCenter - previousCenter
-                        testVector = detectionCenter - previousCenter
+                        referenceVector = [predictionCenter[0] - previousCenter[0], predictionCenter[1]- previousCenter[1]]
+                        testVector = [detectionCenter[0] - previousCenter[0], detectionCenter[1] - previousCenter[1]]
 
-                        distance = utils.distanceBetweenTwoPoints(centerDetection, centerPrediction)
+                        distance = utils.distanceBetweenTwoPoints(detectionCenter, predictionCenter)
                         cos = utils.cosineBetweenTwoVectors(referenceVector, testVector)
 
                         if(cos > 0):
@@ -157,7 +157,7 @@ class TrackerFacade:
 
             else:
 
-                costMatrix = self.distanceCosinusCostMatrix(detections)
+                costMatrix = self.distanceCosineCostMatrix(detections)
                 row_ind, col_ind = linear_sum_assignment(costMatrix)      # Hungarian method for assignment
 
 
@@ -186,8 +186,11 @@ class TrackerFacade:
                         del_trackers.append(i)
                 if len(del_trackers) > 0:  # only when skipped frame exceeds max
                     for id in del_trackers:
-                        del self.trackers[id]
-                        del assignment[id]
+                        try:
+                            del self.trackers[id]
+                            assignment = np.delete(assignment, id)
+                        except:
+                            print("Shit is happening here")
 
 
                 # Now look for un_assigned detects
@@ -218,10 +221,11 @@ class TrackerFacade:
                         self.trackers[i].update(center)
 
 
-        def getCentersVector():
+        def getCentersVector(self):
             centersVector = []
             for trk in self.trackers:
-                centersVector.append([trk.id, trk.type, trk.centers[-1], trk.centers[-2]])
+                if(len(trk.centers) >= 2):
+                    centersVector.append([trk.ID, trk.TYPE, trk.centers[-1], trk.centers[-2]])
 
             return centersVector
 

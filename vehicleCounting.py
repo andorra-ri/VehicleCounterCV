@@ -15,7 +15,7 @@ from track import TrackerFacade
 #-----------------------------
 #<------ Configuration ------>
 #-----------------------------
-mask = mask.Mask("config-files/maskConfig.json"))
+mask = mask.Mask("config-files/maskConfig.json")
 db = sqlmanager.SQLManager("config-files/MySQLConfig.json")
 
 counter = counter.loadCounter("config-files/counterConfig.json")
@@ -46,8 +46,8 @@ if __name__ == "__main__":
     fourcc = cv2.VideoWriter_fourcc(*'DIVX')
     out = cv2.VideoWriter('output.avi', fourcc, 25, (frame_width, frame_height))
 
-    net = load_net(b"darknet/cfg/yolov3.cfg", b"darknet/yolov3.weights", 0)
-    meta = load_meta(b"darknet/cfg/coco.data")
+    net = detection.load_net(b"darknet/cfg/yolov3.cfg", b"darknet/yolov3.weights", 0)
+    meta = detection.load_meta(b"darknet/cfg/coco.data")
     cv2.namedWindow("img", cv2.WINDOW_GUI_NORMAL)
 
     roibbox = mask.getVertices()
@@ -61,7 +61,7 @@ if __name__ == "__main__":
 
         if(len(cleanedDetections) > 0):
             trackerFacade.update(cleanedDetections)                                     #Track detections
-            centersVectors = trackerFacade.getCenterVector()                            #Get array of the last two centers for each object
+            centersVectors = trackerFacade.getCentersVector()                            #Get array of the last two centers for each object
             counter.count(centersVector)
             trackerFacade.draw(img, [0, 255, 0])
 

@@ -18,7 +18,7 @@ def bboxToCenter(bbox):       #bbox = [xmin, ymin, xmax, ymax]
 
 
 def insideBbox(bboxReference, bboxTest):
-    if(bboxTest[0] < bboxReference[0] or bboxTest[1] < bboxReference[1] or bboxTest[2] > bboxReference[2] or bboxTest[3] > bboxReference[3]):
+    if(bboxTest[0] < bboxReference[0][0] or bboxTest[1] < bboxReference[0][1] or bboxTest[2] > bboxReference[1][0] or bboxTest[3] > bboxReference[1][1]):
         return False
     else:
         return True
