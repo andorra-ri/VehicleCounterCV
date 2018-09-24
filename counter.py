@@ -99,10 +99,14 @@ class SimpleCounter:
 
     def storeToMySQL(self):
 
-        #We should ask to the sqlmanager class which tables does the database has and chose the appropiate
+        table = sqlmanager.getTable()
+        dictKeys = list(self.dictCounter.keys())
+        keysComSep = ', '.join(dictKeys)
+        keysVal = ')s , %('.join(dictKeys)
 
-        sql = "INSERT INTO `counters` ( `laneId`, `timestamp`, `person`, `bicycle`, `motorbike`, `car`, `truck`, `bus`) VALUES ( %(laneId)s, NOW(), %(person)s, %(bicycle)s, %(motorbike)s, %(car)s, %(truck)s,%(bus)s )"
-        sqlmanager.executeInsertQuery(sqlStatement, data)
+        sqlStatement = "INSERT INTO " + table + " (laneId, timestamp, " + keysComSep + ") VALUES ( %(laneId)s, NOW(), %(" + keysVal + ")s )"
+
+        sqlmanager.executeInsertQuery(sqlStatement, self.lanesCounter)
 
         self.clear()
 

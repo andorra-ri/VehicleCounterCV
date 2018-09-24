@@ -18,12 +18,12 @@ class SQLManager:
         try:
             cursor = self.conn.cursor()
             cursor.executemany(sqlStatement, data)        #We use executemany because we will have more than one insert
-            conn.commit()
+            self.conn.commit()
         except mysql.connector.Error as err:
             self.connect()
             cursor = self.conn.cursor()
             cursor.executemany(sqlStatement, data)
-            conn.commit()
+            self.conn.commit()
 
         return cursor
 
