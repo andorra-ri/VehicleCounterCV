@@ -1,16 +1,17 @@
 #-----------------------------
 #<-------- Libraries -------->
 #-----------------------------
+import sys
 import cv2
-import counter
 import utils
 import detection
 import mask
 import sqlmanager
 import schedule
+import track
 
-from track import TrackerFacade
-
+sys.path.insert(0, "analysis/")
+import analyzer
 
 #-----------------------------
 #<------ Configuration ------>
@@ -18,7 +19,7 @@ from track import TrackerFacade
 mask = mask.Mask("config-files/maskConfig.json")
 db = sqlmanager.SQLManager("config-files/MySQLConfig.json")
 
-counter = counter.loadCounter("config-files/counterConfig.json")
+analyzerObjct = analyzer.loadAnalyzer("config-files/analysisConfig.json")
 
 
 #-----------------------------
@@ -32,13 +33,10 @@ if __name__ == "__main__":
     # cap.set(4, 720)
 
     # Instance of tracker
-    trackerFacade = TrackerFacade(50, 10)
-
-    # Initialize counter
-    counter.initCounter()
+    trackerFacade = track.TrackerFacade(50, 10)
 
     # Define scheduler
-    schedule.every(5).minutes.do(counter.storeToMySQL())
+    schedule.every(5).minutes.do(analyzerObjct.saveToSQL())
 
     #Saving video
     frame_width = int(cap.get(3))
@@ -62,7 +60,7 @@ if __name__ == "__main__":
         if(len(cleanedDetections) > 0):
             trackerFacade.update(cleanedDetections)                                     #Track detections
             centersVectors = trackerFacade.getCentersVector()                            #Get array of the last two centers for each object
-            counter.count(centersVector)
+            analyzerObjct.main(centersVector)
             trackerFacade.draw(img, [0, 255, 0])
 
         schedule.run_pending()
