@@ -19,7 +19,7 @@ import analyzer
 mask = mask.Mask("config-files/maskConfig.json")
 db = sqlmanager.SQLManager("config-files/MySQLConfig.json")
 
-analyzerObjct = analyzer.loadAnalyzer("config-files/analysisConfig.json")
+analyzerObjct = analyzer.loadAnalyzer("config-files/analyzerConfig.json")
 
 
 #-----------------------------

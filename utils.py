@@ -84,8 +84,9 @@ def laneIntersection(self, vector, lanes):
     a2 = np.array(vector[3])
 
     for lane in lanes:
-        b1 = np.array(lane[3][0][0])
-        b2 = np.array(lane[3][0][1])
+        laneVertices = lane.getVertices()
+        b1 = np.array(laneVertices[0])
+        b2 = np.array(laneVertices[1])
 
         da = a2-a1
         db = b2-b1
@@ -100,3 +101,16 @@ def laneIntersection(self, vector, lanes):
         p2 = make_path(b1[0],b1[1],b2[0],b2[1])
         if (p1.contains_point([x3,y3]) and p2.contains_point([x3,y3])):
             return lane
+
+
+def zoneContainsPoint(self, point, zones):
+    pointX = point[0]
+    pointY = point[1]
+
+    for zone in zones:
+        zoneVertices = zone.getVertices()
+        zoneLeftTop = zoneVertices[0]
+        zoneRightBottom = zoneVertices[1]
+
+        if(pointX >= zoneLeftTop[0] and pointX <= zoneRightBottom[0] and pointY >= zoneLeftTop[1] and pointY <= zoneRightBottom[1]):
+            return zone

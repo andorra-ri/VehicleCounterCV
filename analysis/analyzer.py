@@ -21,7 +21,7 @@ def loadAnalyzer(path):
         with open(path, 'r') as handle:
             analysisConfig = json.load(handle)
             objectType = analysisConfig["objectType"]
-            objectConfig = analysisConfig["config"]
+            objectConfig = analysisConfig["objectConfig"]
     except:
         print("Couldn't find the file")
 

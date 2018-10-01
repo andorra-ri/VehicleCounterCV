@@ -1,0 +1,19 @@
+{
+	"objectType":"counter",
+	"objectConfig": {
+		"id": 1,
+		"name": "Something",
+		"geomType": "lane",
+		"geomConfig": [{
+			"id": 1,
+			"name": "name1",
+			"type": 0,
+			"vertices": [[23,10], [150,122]]
+		}, {
+			"id": 2,
+			"name": "name2",
+			"type": 0,
+			"vertices": [[300,150], [411,269]]
+		}]
+	}
+}
