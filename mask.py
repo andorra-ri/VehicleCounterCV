@@ -1,11 +1,9 @@
 #-----------------------------
 #<-------- Libraries -------->
 #-----------------------------
-import numpy as np
 import json
 import os.path
 import cv2
-import math
 
 
 #-----------------------------
@@ -18,12 +16,7 @@ class Mask:
         if(os.path.exists(path)):
             with open(path, 'r') as handle:
                 maskConfig = json.load(handle)
-                self.setVertices(maskConfig)
-
-
-    def saveMask(self, path):
-        with open(path, 'w') as handle:
-            json.dump(self.VERTICES, handle)
+                self.VERTICES = maskConfig["maskConfig"]["vertices"]
 
 
     def getVertices(self):
