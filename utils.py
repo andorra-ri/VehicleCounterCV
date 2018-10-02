@@ -80,8 +80,8 @@ def perp(a):
     return b
 
 def laneIntersection(self, vector, lanes):
-    a1 = np.array(vector[2])
-    a2 = np.array(vector[3])
+    a1 = np.array(vector[2][0])
+    a2 = np.array(vector[2][1])
 
     for lane in lanes:
         laneVertices = lane.getVertices()

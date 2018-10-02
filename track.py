@@ -221,11 +221,11 @@ class TrackerFacade:
                         self.trackers[i].update(center)
 
 
-        def getCentersVector(self):
+        def getCentersVector(self, numCenters):
             centersVector = []
             for trk in self.trackers:
                 if(len(trk.centers) >= 2):
-                    centersVector.append([trk.ID, trk.TYPE, trk.centers[-1], trk.centers[-2]])
+                    centersVector.append([trk.ID, trk.TYPE, trk.centers[:numCenters]])
 
             return centersVector
 

@@ -59,7 +59,7 @@ if __name__ == "__main__":
 
         if(len(cleanedDetections) > 0):
             trackerFacade.update(cleanedDetections)                                     #Track detections
-            centersVectors = trackerFacade.getCentersVector()                            #Get array of the last two centers for each object
+            centersVectors = trackerFacade.getCentersVector(2)                          #Get array of the last two centers for each object
             analyzerObjct.main(centersVector)
             trackerFacade.draw(img, [0, 255, 0])
 
