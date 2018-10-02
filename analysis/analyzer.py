@@ -7,7 +7,7 @@ class Analyzer(ABC):
         pass
 
     @abstractmethod
-    def main(self, trackers):
+    def main(self, classTrackers):
         pass
 
     @abstractmethod

@@ -54,13 +54,12 @@ if __name__ == "__main__":
     while(1):
         ret, img = cap.read()
 
-        detections = detection.detect_numpy(net, meta, img)                             #YOLO detection
-        cleanedDetections = detection.cleanDetections(detections, roibbox, 0.8)         #Clean detections
+        detections = detection.detect_numpy(net, meta, img)                             # YOLO detection
+        cleanedDetections = detection.cleanDetections(detections, roibbox, 0.8)         # Clean detections
 
         if(len(cleanedDetections) > 0):
-            trackerFacade.update(cleanedDetections)                                     #Track detections
-            centersVectors = trackerFacade.getCentersVector(2)                          #Get array of the last two centers for each object
-            analyzerObjct.main(centersVector)
+            trackerFacade.update(cleanedDetections)                                     # Track detections
+            analyzerObjct.main(trackerFacade)                                           # We provide to the analyzer object the instance of trackers
             trackerFacade.draw(img, [0, 255, 0])
 
         schedule.run_pending()

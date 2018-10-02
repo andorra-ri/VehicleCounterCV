@@ -56,12 +56,14 @@ class Counter(Analyzer):
 
 
     #MAIN method of the class
-    def main(self, centers):
+    def main(self, classTrackers):
         if(self.geomType == "lane"):
+            centers = classTrackers.getCentersVector(2)
             for vector in centers:
-                geom = utils.laneIntersection(vector, self.geometries)
+                geom = utils.laneIntersection(vector[2], self.geometries)
                 self.addCount(geom, vector[1])
         elif(self.geomType == "zone"):
+            centers = classTrackers.getCentersVector(1)
             for vector in centers:
                 geom = utils.zoneContains(vector[2], self.geometries)
                 self.addCount(geom, vector[1])
