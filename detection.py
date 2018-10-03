@@ -188,7 +188,7 @@ def detect(net, meta, image, thresh=.5, hier_thresh=.5, nms=.45):
     free_detections(dets, num)
     return res
 
-def detect_numpy(net, meta, image, thresh=.3, hier_thresh=.5, nms=.45):
+def detectObjects(net, meta, image, thresh=.3, hier_thresh=.5, nms=.45):
     im, arr = array_to_image(image)
     num = c_int(0)
     pnum = pointer(num)
@@ -202,10 +202,9 @@ def detect_numpy(net, meta, image, thresh=.3, hier_thresh=.5, nms=.45):
         for i in range(meta.classes):
             if (dets[j].prob[i] > 0 & (meta.names[i].decode('utf-8') in YOLOobjects)):          #probably we will need to add decode('utf-8') to meta.names
                 b = dets[j].bbox
-                res.append(((b.x - b.w/2), (b.y - b.h/2), (b.x + b.w/2), (b.y + b.h/2), meta.names[i].decode('utf-8'), dets[j].prob[i]))
+                res.append([int(b.x - b.w/2), int(b.y - b.h/2), int(b.x + b.w/2), int(b.y + b.h/2), str(meta.names[i].decode('utf-8')), float(dets[j].prob[i])])
     free_detections(dets, num)
-    r =np.array(res)
-    return r
+    return res
 
 
 def detectionsInsideBbox(maskBbox, detections):

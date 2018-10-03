@@ -9,6 +9,8 @@ class SQLManager:
             self.table = self.dbConfig["table"]
             del self.dbConfig["table"]
 
+            self.connect()
+
 
     def connect(self):
         try:

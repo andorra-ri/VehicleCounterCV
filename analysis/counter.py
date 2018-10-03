@@ -16,7 +16,7 @@ import utils
 #-----------------------------
 #<------ Configuration ------>
 #-----------------------------
-with open('../config-files/YOLOobjects.json', 'r') as handle:
+with open('config-files/YOLOobjects.json', 'r') as handle:
     fileConfig = json.load(handle)
     YOLOobjects = fileConfig["YOLOobjects"]
 
@@ -27,18 +27,19 @@ class Counter(Analyzer):
         self.NAME = jsonConfig["name"]
         self.geomType = jsonConfig["geomType"]
         self.counter = []
+        self.geometries = []
         self.dictCounter = dict.fromkeys(YOLOobjects, 0) #Counter with the following structure: {type:counts, type:counts, ...}
 
-        self.appendGeometry(["geomConfig"])
+        self.appendGeometry(jsonConfig["geomConfig"])
         self.initCounter()
 
 
     def appendGeometry(self, rawGeometry):
         module = importlib.import_module("geometries")
-        class_ = getattr(module, self.geomType.title())
+        clss_ = getattr(module, self.geomType.title())
 
         for geometry in rawGeometry:
-            self.geometries.append( class_(rawGeometry["id"], rawGeometry["name"], rawGeometry["type"], rawGeometry["vertices"]) )
+            self.geometries.append( clss_(geometry["id"], geometry["name"], geometry["type"], geometry["vertices"]) )
 
 
     def initCounter(self):
@@ -72,20 +73,20 @@ class Counter(Analyzer):
         return self.counter
 
 
-    def drawGeom(self, img, color):
+    def drawGeometries(self, img, color):
         for geom in self.geometries:
             geom.draw(img, color)
 
 
-    def drawCounter(self, img):
+    def draw(self, img):
         for t, count in enumerate(self.counter):
             yAddjust = t * 350
 
-            cv2.rectangle(img, (img.shape[1]-250, 50+yAddjust), (img.shape[1]-50, 50+300+yAddjust), color, -1)
+            cv2.rectangle(img, (img.shape[1]-250, 50+yAddjust), (img.shape[1]-50, 50+300+yAddjust), [100, 100, 100], -1)
             cv2.putText(img, "Counter", (img.shape[1]-230, 100+yAddjust), cv2.FONT_HERSHEY_SIMPLEX, 1, [255, 255, 255], 6)
 
             for num, key in enumerate(count):
-                value = str(self.counter.get(key))
+                value = str(count[key])
                 cv2.putText(img, key+": "+value, (img.shape[1]-230, 160+40*num+yAddjust), cv2.FONT_HERSHEY_SIMPLEX, 1, [255,255,255], 4)
 
 
@@ -93,14 +94,14 @@ class Counter(Analyzer):
         self.counter = dict.fromkeys(self.counter, 0)
 
 
-    def saveToSQL(self):
-        table = sqlmanager.getTable()
+    def saveToSQL(self, instanceSQLManager):
+        table = instanceSQLManager.getTable()
         dictKeys = list(self.dictCounter.keys())
         keysComSep = ', '.join(dictKeys)
         keysVal = ')s , %('.join(dictKeys)
 
         sqlStatement = "INSERT INTO " + table + " (id, timestamp, " + keysComSep + ") VALUES ( %(id)s, NOW(), %(" + keysVal + ")s )"
 
-        sqlmanager.executeInsertQuery(sqlStatement, self.counter)
+        instanceSQLManager.executeInsertQuery(sqlStatement, self.counter)
 
         self.clear()

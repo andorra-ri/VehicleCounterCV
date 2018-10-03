@@ -36,7 +36,7 @@ if __name__ == "__main__":
     trackerFacade = track.TrackerFacade(50, 10)
 
     # Define scheduler
-    schedule.every(5).minutes.do(analyzerObjct.saveToSQL())
+    schedule.every(5).minutes.do(analyzerObjct.saveToSQL(db))
 
     #Saving video
     frame_width = int(cap.get(3))
@@ -54,7 +54,7 @@ if __name__ == "__main__":
     while(1):
         ret, img = cap.read()
 
-        detections = detection.detect_numpy(net, meta, img)                             # YOLO detection
+        detections = detection.detectObjects(net, meta, img)                             # YOLO detection
         cleanedDetections = detection.cleanDetections(detections, roibbox, 0.8)         # Clean detections
 
         if(len(cleanedDetections) > 0):
@@ -66,7 +66,8 @@ if __name__ == "__main__":
 
         mask.drawMask(img, [0,0,255])
 
-        #counter.drawCounter(img)
+        analyzerObjct.draw(img)
+        analyzerObjct.drawGeometries(img, [0, 255, 0])
 
         cv2.imshow("img", img)
         out.write(img)

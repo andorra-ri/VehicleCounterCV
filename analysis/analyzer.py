@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 import importlib
+import os.path
+import json
 
 class Analyzer(ABC):
     @abstractmethod
@@ -17,16 +19,14 @@ class Analyzer(ABC):
 
 
 def loadAnalyzer(path):
-    try:
+    if(os.path.exists(path)):
         with open(path, 'r') as handle:
             analysisConfig = json.load(handle)
             objectType = analysisConfig["objectType"]
             objectConfig = analysisConfig["objectConfig"]
-    except:
-        print("Couldn't find the file")
 
-    module = importlib.import_module(objectType)
-    class_ = getattr(module, objectType.title())
-    instance = class_(objectConfig)
+            module = importlib.import_module(objectType)
+            class_ = getattr(module, objectType.title())
+            instance = class_(objectConfig)
 
-    return instance
+            return instance

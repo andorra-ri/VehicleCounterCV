@@ -88,11 +88,11 @@ class Tracking:
         return self.counter
 
 
-    def drawGeometries(self, img):
+    def drawGeometries(self, img, color):
         for geomIn in self.geom_in:
-            geomIn.draw(img, [0, 255, 0])
+            geomIn.draw(img, color)
         for geomOut in self.geom_out:
-            geomOut.draw(img, [0, 0, 255])
+            geomOut.draw(img, color)
 
 
     def saveToSQL(self):
