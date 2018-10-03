@@ -13,7 +13,15 @@ instructions = '[m] Add mask or [c] Add analyzer'
 extra = ''
 step = 0
 maskVertices = []
-geomVertices = []
+geomVERTICES = []
+analyzerTYPE = ''
+analyzerID = ''
+analyzerNAME = ''
+analyzerGeomType = ''
+geom = {}
+geomID = ''
+geomNAME = ''
+geomTYPE = ''
 
 
 #-----------------------------
@@ -23,7 +31,6 @@ def loadMaskConfig(path):
     if (os.path.exists(path)):
         with open(path, 'r') as handle:
             maskConfig = json.load(handle)
-            maskConfig = maskConfig["maskConfig"]
     else:
         maskConfig = {}
         maskConfig["maskConfig"] = {}
@@ -50,25 +57,25 @@ def loadAnalyzerConfig(path):
 
 def drawMask(mask, img, color):
     vertices  = mask["maskConfig"]["vertices"]
-    if(len(vertices > 0):
+    if(len(vertices) > 0):
         pt1 = (vertices[0][0], vertices[0][1])
         pt2 = (vertices[1][0], vertices[1][1])
 
         cv2.rectangle(img, pt1, pt2, color, 3)
 
 
-def drawAnalyzer(analyzer, img):
+def drawAnalyzer(analyzer, img, color):
     type = analyzer["objectConfig"]["geomType"]
     geoms = analyzer["objectConfig"]["geomConfig"]
     if(type == "lane"):
         for geom in geoms:
-            p1 = (geom["vertices"][0])
-            p2 = (geom["vertices"][1])
+            p1 = tuple(geom["vertices"][0])
+            p2 = tuple(geom["vertices"][1])
             cv2.line(img, p1, p2, color, 1)
     elif(type == "zone"):
         for geom in geoms:
-            p1 = (geom["vertices"][0])
-            p2 = (geom["vertices"][1])
+            p1 = tuple(geom["vertices"][0])
+            p2 = tuple(geom["vertices"][1])
             cv2.rectangle(img, p1, p2, color, 3)
 
 
@@ -81,7 +88,7 @@ def mouseClicked(event, x, y, flags, param):
                 maskVertices.append([x,y])
             elif(len(maskVertices) == 2):
                 print("Mask has two vertices, you can't add another vertice!")
-        if step == 9:
+        if step == 10:
             if(len(geomVERTICES) <= 2):
                 geomVERTICES.append([x,y])
             elif(len(geomVERTICES) ==2):
@@ -106,7 +113,7 @@ if __name__ == "__main__":
         ret, img = cap.read()
 
         drawMask(mask, img, [0,0,255])
-        drawAnalyzer(analyzer, img)
+        drawAnalyzer(analyzer, img, [0, 255, 0])
 
         cv2.putText(img, instructions, (20,30), cv2.FONT_HERSHEY_TRIPLEX, 0.5, (255,255,255))
         cv2.putText(img, extra, (20,55), cv2.FONT_HERSHEY_DUPLEX, 0.7, (255,255,255))
@@ -140,10 +147,10 @@ if __name__ == "__main__":
                 step = 3
                 instructions = '[a-z]: Enter ID - [ENTER] Save & Finish'
                 extra =''
+                analyzer["objectType"] = analyzerTYPE
             elif key is not 255:
                 analyzerTYPE += chr(key%256)
                 extra = analyzerTYPE
-                analyzer["objectType"] = analyzerType
 
         # Analyzer ID
         elif step == 3:
@@ -151,21 +158,23 @@ if __name__ == "__main__":
                 step = 4
                 instructions = '[a-z]: Enter NAME -  [ENTER] Save & Finish'
                 extra = ''
+                analyzer["objectConfig"]["id"] = analyzerID
             elif key is not 255:		# Enter numeric ID
                 analyzerID += chr(key%256)
                 extra = analyzerID
-                analyzer["objectConfig"]["id"] = analyzerID
+
 
         # Analyzer NAME
         elif step == 4:
             if key == 13:    # Press ENTER to go step 4 (new counter type)
                 step = 5
-                instructions = 'Enter Type: [0] SIMPLE  [1] COMPLEX -  [ENTER] Save & Finish'
+                instructions = 'Enter GeomType: lane or zone -  [ENTER] Save & Finish'
                 extra = ''
+                analyzer["objectConfig"]["name"] = analyzerNAME
             elif key is not 255:		# Enter numeric ID
                 analyzerNAME += chr(key%256)
                 extra = analyzerNAME
-                analyzer["objectConfig"]["name"] = analyzerNAME
+
 
         # Analyzer Geom TYPE
         elif step == 5:
@@ -173,10 +182,10 @@ if __name__ == "__main__":
                 step = 6
                 instructions = '[+] Add new geom'
                 extra = ''
+                analyzer["objectConfig"]["geomType"] = analyzerGeomType
             elif key is not 255:
                 analyzerGeomType += chr(key%256)
                 extra = analyzerGeomType
-                analyzer["objectConfig"]["geomType"] = analyzerGeomType
 
         # New geom
         elif step == 6:
@@ -191,10 +200,10 @@ if __name__ == "__main__":
                 step = 8
                 instructions = '[a-z]: Enter NAME -  [ENTER] Save & Finish'
                 extra = ''
+                geom["id"] = geomID
             elif key is not 255:		# Enter numeric ID
                 geomID += chr(key%256)
                 extra = geomID
-                geom["id"] = geomID
 
         # Geom NAME
         elif step == 8:
@@ -202,23 +211,23 @@ if __name__ == "__main__":
                 step = 9
                 instructions = 'Enter Type: [0] INDIFERENT  [1] IN  [2] OUT  -  [ENTER] Save & Finish'
                 extra = ''
+                geom["name"] = geomNAME
             elif key is not 255:    # Enter numeric ID
                 geomNAME += chr(key%256)
                 extra = geomNAME
-                geom["name"] = geomNAME
 
         # Geom TYPE
         elif step == 9:
             if key == 13:    # Press ENTER to go step 9 (new geom vertices)
                 step = 10
                 instructions = '[CLICK] Add vertices  -  [ENTER] Save & Finish'
-                geom["type"] = geomType
+                geom["type"] = geomTYPE
             elif key is 48:
-                geomType = 0
+                geomTYPE = 0
             elif key is 49:
-                geomType = 1
+                geomTYPE = 1
             elif key is 50:
-                geomType = 2
+                geomTYPE = 2
 
         # Geom VERTICES
         elif step == 10:
@@ -227,11 +236,11 @@ if __name__ == "__main__":
                     geom["vertices"] = geomVERTICES
                     analyzer["objectConfig"]["geomConfig"].append(geom)
                     step = 6
-                    instructions = '[+] Add new lane'
+                    instructions = '[+] Add new geom'
                     extra = ''
                     geomID = ''
                     geomNAME = ''
-                    geomType = ''
+                    geomTYPE = ''
                     geomVERTICES = []
 
 
