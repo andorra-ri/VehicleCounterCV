@@ -5,15 +5,14 @@ import math
 import cv2
 import numpy as np
 import utils
-import pickle
+import json
 from scipy.optimize import linear_sum_assignment
 
 
 #-----------------------------
 #<------ Configuration ------>
 #-----------------------------
-with open('config-files/YOLOdict.pickle', 'rb') as handle:
-    YOLOdict = pickle.load(handle)
+
 
 
 #-----------------------------
@@ -85,8 +84,7 @@ class Tracker:
             pt2 = (xmax, ymax)
             cv2.rectangle(img, pt1, pt2, color, 1)
             cv2.circle(img, (int(self.centers[-1][0]), int(self.centers[-1][1])), 2, (0,0,255))
-            otype = list(YOLOdict.keys())[list(YOLOdict.values()).index(self.TYPE)]
-            cv2.putText(img, str(otype)+'id: '+str(self.ID), (int(self.centers[-1][0]), int(self.centers[-1][1])), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255,255,255))
+            cv2.putText(img, str(self.TYPE)+'id: '+str(self.ID), (int(self.centers[-1][0]), int(self.centers[-1][1])), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255,255,255))
             '''for i in range(1, len(self.centers)):
                 cv2.line(img, (int(self.centers[i-1][0]), int(self.centers[i-1][1])), (int(self.centers[i][0]), int(self.centers[i][1])), (0,0,255), 1)
             for i in range(1, len(self.predictions)):
@@ -134,10 +132,10 @@ class TrackerFacade:
                         predictionCenter = self.trackers[i].predictions[-1]
                         previousCenter = self.trackers[i].center()
 
-                        referenceVector = predictionCenter - previousCenter
-                        testVector = detectionCenter - previousCenter
+                        referenceVector = [predictionCenter[0] - previousCenter[0], predictionCenter[1]- previousCenter[1]]
+                        testVector = [detectionCenter[0] - previousCenter[0], detectionCenter[1] - previousCenter[1]]
 
-                        distance = utils.distanceBetweenTwoPoints(centerDetection, centerPrediction)
+                        distance = utils.distanceBetweenTwoPoints(detectionCenter, predictionCenter)
                         cos = utils.cosineBetweenTwoVectors(referenceVector, testVector)
 
                         if(cos > 0):
@@ -159,7 +157,7 @@ class TrackerFacade:
 
             else:
 
-                costMatrix = self.distanceCosinusCostMatrix(detections)
+                costMatrix = self.distanceCosineCostMatrix(detections)
                 row_ind, col_ind = linear_sum_assignment(costMatrix)      # Hungarian method for assignment
 
 
@@ -188,8 +186,11 @@ class TrackerFacade:
                         del_trackers.append(i)
                 if len(del_trackers) > 0:  # only when skipped frame exceeds max
                     for id in del_trackers:
-                        del self.trackers[id]
-                        del assignment[id]
+                        try:
+                            del self.trackers[id]
+                            assignment = np.delete(assignment, id)
+                        except:
+                            print("Shit is happening here")
 
 
                 # Now look for un_assigned detects
@@ -218,6 +219,15 @@ class TrackerFacade:
                     else:
                         center = self.trackers[i].predictions[-1]
                         self.trackers[i].update(center)
+
+
+        def getCentersVector(self, numCenters):
+            centersVector = []
+            for trk in self.trackers:
+                if(len(trk.centers) >= 2):
+                    centersVector.append([trk.ID, trk.TYPE, trk.centers[:numCenters]])
+
+            return centersVector
 
 
         def draw(self, img, color):

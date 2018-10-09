@@ -1,39 +1,85 @@
 #-----------------------------
 #<-------- Libraries -------->
 #-----------------------------
-import math
-import random
 import cv2
-import time
-import numpy as np
-import pickle
+import json
 import os.path
-import counter
-import utils
 
 
 #-----------------------------
 #<------ Configuration ------>
 #-----------------------------
-instructions = '[m] Add mask or [c] Add counter'
+instructions = '[m] Add mask or [c] Add analyzer'
 extra = ''
 step = 0
 maskVertices = []
-counterTYPE = ''
-counterID = ''
-counterNAME = ''
-laneID = ''
-laneNAME = ''
-laneTYPE = ''
-laneVERTICES = []
+geomVERTICES = []
+analyzerTYPE = ''
+analyzerID = ''
+analyzerNAME = ''
+analyzerGeomType = ''
+geom = {}
+geomID = ''
+geomNAME = ''
+geomTYPE = ''
 
-mask = utils.Mask()
-mask.loadMask("config-files/maskConfig.pickle")
-counter = counter.loadCounter("config-files/counterConfig.pickle")
 
 #-----------------------------
 #<-------- Functions -------->
 #-----------------------------
+def loadMaskConfig(path):
+    if (os.path.exists(path)):
+        with open(path, 'r') as handle:
+            maskConfig = json.load(handle)
+    else:
+        maskConfig = {}
+        maskConfig["maskConfig"] = {}
+        maskConfig["maskConfig"]["vertices"] = []
+
+    return maskConfig
+
+
+def loadAnalyzerConfig(path):
+    if (os.path.exists(path)):
+        with open(path, 'r') as handle:
+            analyzerConfig = json.load(handle)
+    else:
+        analyzerConfig = {}
+        analyzerConfig["objectType"] = ""
+        analyzerConfig["objectConfig"] = {}
+        analyzerConfig["objectConfig"]["id"] = ""
+        analyzerConfig["objectConfig"]["name"] = ""
+        analyzerConfig["objectConfig"]["geomType"] = ""
+        analyzerConfig["objectConfig"]["geomConfig"] = []
+
+    return analyzerConfig
+
+
+def drawMask(mask, img, color):
+    vertices  = mask["maskConfig"]["vertices"]
+    if(len(vertices) > 0):
+        pt1 = (vertices[0][0], vertices[0][1])
+        pt2 = (vertices[1][0], vertices[1][1])
+
+        cv2.rectangle(img, pt1, pt2, color, 3)
+
+
+def drawAnalyzer(analyzer, img, color):
+    type = analyzer["objectConfig"]["geomType"]
+    geoms = analyzer["objectConfig"]["geomConfig"]
+    if(type == "lane"):
+        for geom in geoms:
+            p1 = tuple(geom["vertices"][0])
+            p2 = tuple(geom["vertices"][1])
+            cv2.line(img, p1, p2, color, 1)
+    elif(type == "zone"):
+        for geom in geoms:
+            p1 = tuple(geom["vertices"][0])
+            p2 = tuple(geom["vertices"][1])
+            cv2.rectangle(img, p1, p2, color, 3)
+
+
+
 # MOUSE EVENT HANDLER
 def mouseClicked(event, x, y, flags, param):
     if event == cv2.EVENT_LBUTTONUP:
@@ -42,14 +88,10 @@ def mouseClicked(event, x, y, flags, param):
                 maskVertices.append([x,y])
             elif(len(maskVertices) == 2):
                 print("Mask has two vertices, you can't add another vertice!")
-        if step == 9:
-            if(len(laneVERTICES) <= 2):
-                xmask = maskVertices[0][0]
-                ymask = maskVertices[0][1]
-                xlane = x - xmask
-                ylane = y - ymask
-                laneVERTICES.append([xlane,ylane])
-            elif(len(laneVERTICES) ==2):
+        if step == 10:
+            if(len(geomVERTICES) <= 2):
+                geomVERTICES.append([x,y])
+            elif(len(geomVERTICES) ==2):
                 print("Lane has two vertices, you can't add another vertice!")
 
 
@@ -63,12 +105,15 @@ if __name__ == "__main__":
     cv2.namedWindow("img", cv2.WINDOW_GUI_NORMAL)
     cv2.setMouseCallback('img', mouseClicked)
 
+    mask = loadMaskConfig('config-files/maskConfig.json')
+    analyzer = loadAnalyzerConfig('config-files/analyzerConfig.json')
+
     ###MAIN LOOP
     while(1):
         ret, img = cap.read()
 
-        mask.drawMask(img, [0,0,255])
-        #counter.drawLanes(img)
+        drawMask(mask, img, [0,0,255])
+        drawAnalyzer(analyzer, img, [0, 255, 0])
 
         cv2.putText(img, instructions, (20,30), cv2.FONT_HERSHEY_TRIPLEX, 0.5, (255,255,255))
         cv2.putText(img, extra, (20,55), cv2.FONT_HERSHEY_DUPLEX, 0.7, (255,255,255))
@@ -84,109 +129,128 @@ if __name__ == "__main__":
                 instructions = '[CLICK] Add vertices  -  [ENTER] Save & Finish'
             if key == 99:      # Press [c] to go step 2 (new counter)
                 step = 2
-                counter = []
-                instructions = '[0-9] Enter ID  -  [ENTER] Save & Finish'
+                instructions = '[a-z]: Enter TYPE  -  [ENTER] Save & Finish'
 
         # Add vertices to the mask
         elif step == 1:
             if key == 13:
                 if len(maskVertices) == 2:
-                    mask.appendVertices(maskVertices)
+                    mask["maskConfig"]["vertices"] = maskVertices
                     step = 0
                     instructions = '[m] Add mask or [c] Add counter'
                     extra = ''
+                    maskVertices = []
 
-        # Counter ID
-        elif step == 2:
-            if key == 13:	# Press ENTER to go step 3 (new counter name)
-                step = 3
-                instructions = '[a-z]: Enter NAME -  [ENTER] Save & Finish'
-            elif key is not 255:		# Enter numeric ID
-                counterID += chr(key%256)
-                counter.append(counterID)
-                extra = counterID
-
-        # Counter NAME
-        elif step == 3:
-            if key == 13:    # Press ENTER to go step 4 (new counter type)
-                step = 4
-                instructions = 'Enter Type: [0] SIMPLE  [1] COMPLEX -  [ENTER] Save & Finish'
-            elif key is not 255:		# Enter numeric ID
-                counterNAME += chr(key%256)
-                counter.append(counterNAME)
-                extra = counterNAME
-
-        # Counter TYPE
-        elif step == 4:
-            if key == 13:    # Press ENTER to go step 5 (new counter type)
-                step = 5
-                counter.append(counterTYPE)
-                instructions = '[+] Add new lane'
-                counterID = ''
-                counterNAME = ''
-                counterTYPE = ''
-                lanes = []
-            elif key == 115:
-                counterTYPE = 0
-            elif key == 99:
-                counterTYPE = 1
-
-        # New lane
-        elif step == 5:
-            if key == ord('+'):
-                step = 6
-                instructions = '[0-9] Enter laneID  -  [ENTER] Save & Finish'
-
-        # Lane ID
-        elif step == 6:
-            if key == 13:    # Press ENTER to go step 7 (new lane name)
-                step = 7
-                instructions = '[a-z]: Enter NAME -  [ENTER] Save & Finish'
-            elif key is not 255:		# Enter numeric ID
-                laneID += chr(key%256)
-                extra = laneID
-
-        # Lane NAME
-        elif step == 7:
-            if key == 13:    # Press ENTER to go step 8 (new lane type)
-                step = 8
-                instructions = 'Enter Type: [0] INDIFERENT  [1] IN  [2] OUT  -  [ENTER] Save & Finish'
-            elif key is not 255:    # Enter numeric ID
-                laneNAME += chr(key%256)
-                extra = laneNAME
-
-        # Lane TYPE
-        elif step == 8:
-            if key == 13:    # Press ENTER to go step 9 (new lane vertices)
-                step = 9
-                instructions = '[CLICK] Add vertices  -  [ENTER] Save & Finish'
-            elif key is 48:
-                laneTYPE = 0
-            elif key is 49:
-                laneTYPE = 1
-            elif key is 50:
-                laneTYPE = 2
-
-        # Lane VERTICES
-        elif step == 9:
+        # Analyzer TYPE
+        elif step ==2:
             if key == 13:
-                if len(laneVERTICES) == 2:
-                    lanes.append([laneID, laneNAME, laneTYPE, laneVERTICES])
-                    step = 5
-                    instructions = '[+] Add new lane'
+                step = 3
+                instructions = '[a-z]: Enter ID - [ENTER] Save & Finish'
+                extra =''
+                analyzer["objectType"] = analyzerTYPE
+            elif key is not 255:
+                analyzerTYPE += chr(key%256)
+                extra = analyzerTYPE
+
+        # Analyzer ID
+        elif step == 3:
+            if key == 13:	# Press ENTER to go step 3 (new counter name)
+                step = 4
+                instructions = '[a-z]: Enter NAME -  [ENTER] Save & Finish'
+                extra = ''
+                analyzer["objectConfig"]["id"] = analyzerID
+            elif key is not 255:		# Enter numeric ID
+                analyzerID += chr(key%256)
+                extra = analyzerID
+
+
+        # Analyzer NAME
+        elif step == 4:
+            if key == 13:    # Press ENTER to go step 4 (new counter type)
+                step = 5
+                instructions = 'Enter GeomType: lane or zone -  [ENTER] Save & Finish'
+                extra = ''
+                analyzer["objectConfig"]["name"] = analyzerNAME
+            elif key is not 255:		# Enter numeric ID
+                analyzerNAME += chr(key%256)
+                extra = analyzerNAME
+
+
+        # Analyzer Geom TYPE
+        elif step == 5:
+            if key == 13:    # Press ENTER to go step 5 (new counter type)
+                step = 6
+                instructions = '[+] Add new geom'
+                extra = ''
+                analyzer["objectConfig"]["geomType"] = analyzerGeomType
+            elif key is not 255:
+                analyzerGeomType += chr(key%256)
+                extra = analyzerGeomType
+
+        # New geom
+        elif step == 6:
+            if key == ord('+'):
+                step = 7
+                instructions = '[0-9] Enter ID  -  [ENTER] Save & Finish'
+                geom = {}
+
+        # Geom ID
+        elif step == 7:
+            if key == 13:    # Press ENTER to go step 7 (new lane name)
+                step = 8
+                instructions = '[a-z]: Enter NAME -  [ENTER] Save & Finish'
+                extra = ''
+                geom["id"] = geomID
+            elif key is not 255:		# Enter numeric ID
+                geomID += chr(key%256)
+                extra = geomID
+
+        # Geom NAME
+        elif step == 8:
+            if key == 13:    # Press ENTER to go step 8 (new geom type)
+                step = 9
+                instructions = 'Enter Type: [0] INDIFERENT  [1] IN  [2] OUT  -  [ENTER] Save & Finish'
+                extra = ''
+                geom["name"] = geomNAME
+            elif key is not 255:    # Enter numeric ID
+                geomNAME += chr(key%256)
+                extra = geomNAME
+
+        # Geom TYPE
+        elif step == 9:
+            if key == 13:    # Press ENTER to go step 9 (new geom vertices)
+                step = 10
+                instructions = '[CLICK] Add vertices  -  [ENTER] Save & Finish'
+                geom["type"] = geomTYPE
+            elif key is 48:
+                geomTYPE = 0
+            elif key is 49:
+                geomTYPE = 1
+            elif key is 50:
+                geomTYPE = 2
+
+        # Geom VERTICES
+        elif step == 10:
+            if key == 13:
+                if len(geomVERTICES) == 2:
+                    geom["vertices"] = geomVERTICES
+                    analyzer["objectConfig"]["geomConfig"].append(geom)
+                    step = 6
+                    instructions = '[+] Add new geom'
                     extra = ''
-                    laneID = ''
-                    laneNAME = ''
-                    laneTYPE = ''
-                    laneVERTICES = []
+                    geomID = ''
+                    geomNAME = ''
+                    geomTYPE = ''
+                    geomVERTICES = []
 
 
         if key == 115:  #Press [s] to save all geometries
-            mask.saveMask('config-files/maskConfig.pickle')
-            #Save lanes[] to counterGeom.pickle
-            with open('config-files/counterConfig.pickle', 'wb') as handle:
-                counter.append(lanes)
-                pickle.dump(counter, handle, protocol = pickle.HIGHEST_PROTOCOL )
+            #Save mask to maskConfig.json
+            with open('config-files/maskConfig.json', 'w') as han:
+                json.dump(mask, han)
+            #Save analyzer to analyzerConfig.json
+            with open('config-files/analyzerConfig.json', 'w') as handle:
+                json.dump(analyzer, handle)
 
 
         if key == 27:    # Press ESC to quit

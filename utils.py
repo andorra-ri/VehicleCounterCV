@@ -2,10 +2,8 @@
 #<-------- Libraries -------->
 #-----------------------------
 import numpy as np
-import pickle
-import os.path
-import cv2
 import math
+from matplotlib.path import Path
 
 #-----------------------------
 #<-------- Functions -------->
@@ -17,6 +15,13 @@ def bboxToCenter(bbox):       #bbox = [xmin, ymin, xmax, ymax]
     center = [x + width/2, y + height/2]
 
     return center
+
+
+def insideBbox(bboxReference, bboxTest):
+    if(bboxTest[0] < bboxReference[0][0] or bboxTest[1] < bboxReference[0][1] or bboxTest[2] > bboxReference[1][0] or bboxTest[3] > bboxReference[1][1]):
+        return False
+    else:
+        return True
 
 
 def distanceBetweenTwoPoints(point1, point2):
@@ -64,34 +69,48 @@ def iou(bb1,bb2):
 	# return the intersection over union value
 	return iou
 
-#-----------------------------
-#<--------- Classes --------->
-#-----------------------------
-class Mask:
-    def __init__(self):
-        self.VERTICES = []              #[[xmin,ymin], [xmax, ymax]]
 
-    def loadMask(self, path):
-        if(os.path.exists(path)):
-            with open(path, 'rb') as handle:
-                maskConfig = pickle.load(handle)
-                self.appendVertices(maskConfig)
+def make_path(x1, y1, x2, y2):
+    return Path([[x1,y1], [x1,y2], [x2,y2], [x2,y1]])
 
-        return self.VERTICES
+def perp(a):
+    b = np.empty_like(a)
+    b[0] = -a[1]
+    b[1] = a[0]
+    return b
 
-    def saveMask(self, path):
-        with open(path, 'wb') as handle:
-            pickle.dump(self.VERTICES, handle, protocol = pickle.HIGHEST_PROTOCOL )
+def laneIntersection(self, vector, lanes):
+    a1 = np.array(vector[0])
+    a2 = np.array(vector[1])
 
-    def getVertices(self):
-        return self.VERTICES
+    for lane in lanes:
+        laneVertices = lane.getVertices()
+        b1 = np.array(laneVertices[0])
+        b2 = np.array(laneVertices[1])
 
-    def appendVertices(self, vertices):
-        self.VERTICES = vertices
+        da = a2-a1
+        db = b2-b1
+        dp = a1-b1
+        dap = perp(da)
+        denom = np.dot( dap, db)
+        num = np.dot( dap, dp )
 
-    def drawMask(self, img, color):
-        if(len(self.VERTICES) > 0):
-            pt1 = (self.VERTICES[0][0], self.VERTICES[0][1])
-            pt2 = (self.VERTICES[1][0], self.VERTICES[1][1])
+        x3 = ((num / denom.astype(float))*db + b1)[0]
+        y3 = ((num / denom.astype(float))*db + b1)[1]
+        p1 = make_path(a1[0],a1[1],a2[0],a2[1])
+        p2 = make_path(b1[0],b1[1],b2[0],b2[1])
+        if (p1.contains_point([x3,y3]) and p2.contains_point([x3,y3])):
+            return lane
 
-            cv2.rectangle(img, pt1, pt2, color, 3)
+
+def zoneContainsPoint(self, point, zones):
+    pointX = point[0]
+    pointY = point[1]
+
+    for zone in zones:
+        zoneVertices = zone.getVertices()
+        zoneLeftTop = zoneVertices[0]
+        zoneRightBottom = zoneVertices[1]
+
+        if(pointX >= zoneLeftTop[0] and pointX <= zoneRightBottom[0] and pointY >= zoneLeftTop[1] and pointY <= zoneRightBottom[1]):
+            return zone
