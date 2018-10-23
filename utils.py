@@ -100,7 +100,7 @@ def laneIntersection(self, vector, lanes):
         p1 = make_path(a1[0],a1[1],a2[0],a2[1])
         p2 = make_path(b1[0],b1[1],b2[0],b2[1])
         if (p1.contains_point([x3,y3]) and p2.contains_point([x3,y3])):
-            return lane
+            return lane.ID
 
 
 def zoneContainsPoint(self, point, zones):

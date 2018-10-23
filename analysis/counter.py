@@ -50,9 +50,9 @@ class Counter(Analyzer):
             self.counter.append(geomDict)
 
 
-    def addCount(self, geom, type):
+    def addCount(self, geomID, type):
         for g, gm in enumerate(self.geometries):
-            if (gm == geom):
+            if (gm.ID == geomID):
                 self.counter[g][type] +=1
 
 
