@@ -58,8 +58,8 @@ class Tracker:
 
 
         # Return the last center available
-        def center(self):
-            return self.centers[-1]
+        def getCenters(self, numCenters):
+            return self.centers[-numCenters:]
 
 
         # Return the last center prediction available
@@ -130,7 +130,7 @@ class TrackerFacade:
 
                         detectionCenter = utils.bboxToCenter(detections[j][:4])
                         predictionCenter = self.trackers[i].predictions[-1]
-                        previousCenter = self.trackers[i].center()
+                        previousCenter = self.trackers[i].getCenters(1)
 
                         referenceVector = [predictionCenter[0] - previousCenter[0], predictionCenter[1]- previousCenter[1]]
                         testVector = [detectionCenter[0] - previousCenter[0], detectionCenter[1] - previousCenter[1]]
@@ -149,22 +149,17 @@ class TrackerFacade:
 
 
         def update(self, detections):
-
             if (len(self.trackers) == 0):
                 for detection in detections:
                     vehicle = Tracker(detection[:4], detection[4])
                     self.trackers.append(vehicle)
-
             else:
-
                 costMatrix = self.distanceCosineCostMatrix(detections)
                 row_ind, col_ind = linear_sum_assignment(costMatrix)      # Hungarian method for assignment
-
 
                 assignment = np.full(len(self.trackers), -1, dtype = int)
                 for i in range(len(row_ind)):
                     assignment[row_ind[i]] = col_ind[i]
-
 
                 # Identify trackers with no assignment, if any
                 un_assigned_trackers = []
@@ -177,7 +172,6 @@ class TrackerFacade:
                         pass
                     else:
                         self.trackers[i].skippedFrames += 1
-
 
                 # If trackers are not detected for long time, remove them
                 del_trackers = []
@@ -192,20 +186,17 @@ class TrackerFacade:
                         except:
                             print("Shit is happening here")
 
-
                 # Now look for un_assigned detects
                 un_assigned_detects = []
                 for i in range(len(detections)):
                         if i not in assignment:
                             un_assigned_detects.append(i)
 
-
                 # Start new trackers
                 if(len(un_assigned_detects) != 0):
                     for i in range(len(un_assigned_detects)):
                         vehicle = Tracker(detections[un_assigned_detects[i]][:4], detections[un_assigned_detects[i]][4])
                         self.trackers.append(vehicle)
-
 
                 # Update KalmanFilter state, lastResults and trackers trace
                 for i in range(len(assignment)):
@@ -225,7 +216,7 @@ class TrackerFacade:
             centersVector = []
             for trk in self.trackers:
                 if(len(trk.centers) >= 2):
-                    centersVector.append([trk.ID, trk.TYPE, trk.centers[:numCenters]])
+                    centersVector.append([trk.ID, trk.TYPE, trk.getCenters(numCenters)])
 
             return centersVector
 
